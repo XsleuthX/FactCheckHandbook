@@ -1,0 +1,2429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verification Desk — fact-checking tools handbook</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#E7EAF0; --panel:#FCFCFD; --panel-2:#F1F3F7;
+  --ink:#12151C; --ink-2:#4B5265; --ink-3:#767D8F;
+  --rule:#C7CCD8; --marker:#FFE773;
+  --accent:#2F2AB8; --accent-soft:#E2E1F8;
+  --warn:#A8321E; --warn-soft:#F7E3DE;
+  --verify:#0B6E5F; --verify-soft:#DCEDE9;
+  --f-open:#0B6E5F; --f-global:#2F2AB8; --f-china:#B01B2E; --f-msg:#1B6E9E; --f-forensic:#6B2F86;
+  --display:"Bricolage Grotesque","Noto Sans SC",system-ui,sans-serif;
+  --body:"Newsreader","Noto Serif SC",Georgia,serif;
+  --mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  --rail:296px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:76px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.62;-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-underline-offset:3px;text-decoration-thickness:1px}
+a:focus-visible,button:focus-visible,input:focus-visible,[contenteditable]:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+[data-fam=open]{--fam:var(--f-open)} [data-fam=global]{--fam:var(--f-global)} [data-fam=china]{--fam:var(--f-china)}
+[data-fam=msg]{--fam:var(--f-msg)} [data-fam=forensic]{--fam:var(--f-forensic)}
+
+/* ---------- top bar ---------- */
+.topbar{position:sticky;top:0;z-index:60;display:flex;align-items:center;gap:14px;
+  padding:9px 20px;background:rgba(231,234,240,.93);backdrop-filter:blur(9px);border-bottom:1px solid var(--rule);flex-wrap:wrap}
+.tb-title{font-family:var(--display);font-weight:800;font-size:14px;letter-spacing:-.01em;margin-right:auto;display:flex;align-items:center;gap:10px}
+.tb-title em{font-style:normal;font-weight:400;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3)}
+.meter{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:var(--ink-2)}
+.meter .bar{width:76px;height:5px;background:var(--rule);border-radius:99px;overflow:hidden}
+.meter .bar i{display:block;height:100%;background:var(--verify);width:0}
+.btn{font-family:var(--display);font-size:12.5px;font-weight:600;padding:6px 12px;border:1px solid var(--ink);
+  background:transparent;color:var(--ink);border-radius:2px;cursor:pointer;white-space:nowrap}
+.btn:hover{background:var(--ink);color:var(--panel)}
+.btn.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.ghost{border-color:var(--rule);color:var(--ink-2)}
+.btn.ghost:hover{border-color:var(--ink);background:var(--ink);color:var(--panel)}
+.btn[disabled]{opacity:.4;cursor:not-allowed}
+.status{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);letter-spacing:.02em}
+.status.dirty{color:var(--warn)}
+.status.ok{color:var(--verify)}
+
+.helpbox{display:none;padding:16px 20px;background:var(--panel);border-bottom:1px solid var(--rule);font-size:15.5px}
+.helpbox.show{display:block}
+.helpbox .in{max-width:86ch;margin:0 auto}
+.helpbox h4{font-family:var(--display);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin:0 0 8px}
+.helpbox ul{margin:0;padding-left:18px;display:grid;gap:5px}
+.helpbox code{font-family:var(--mono);font-size:13px;background:var(--panel-2);border:1px solid var(--rule);padding:1px 5px;border-radius:2px}
+
+/* ---------- shell ---------- */
+.shell{display:flex;align-items:flex-start;max-width:1480px;margin:0 auto}
+.rail{width:var(--rail);flex:0 0 var(--rail);position:sticky;top:52px;max-height:calc(100vh - 52px);
+  padding:22px 16px 40px 26px;overflow-y:auto;border-right:1px solid var(--rule)}
+.main{flex:1;min-width:0;padding:24px 40px 120px}
+
+.finder{margin:0 0 16px;position:relative}
+.finder input{width:100%;padding:9px 11px 9px 30px;font-family:var(--display);font-size:13px;border:1px solid var(--rule);background:var(--panel);border-radius:2px;color:var(--ink)}
+.finder svg{position:absolute;left:9px;top:50%;transform:translateY(-50%);opacity:.45}
+.famhead{font-family:var(--display);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--fam,var(--ink-3));
+  margin:16px 0 6px;display:flex;align-items:center;gap:7px}
+.famhead:before{content:"";width:7px;height:7px;background:var(--fam);border-radius:99px;flex:none}
+.railnav{list-style:none;margin:0;padding:0}
+.railnav a{display:grid;grid-template-columns:24px 1fr;gap:8px;align-items:baseline;padding:5px 6px;
+  font-family:var(--display);font-size:13.5px;line-height:1.3;color:var(--ink-2);text-decoration:none;border-left:2px solid transparent}
+.railnav a:hover{background:var(--panel);color:var(--ink)}
+.railnav a.on{background:var(--panel);color:var(--ink);border-left-color:var(--fam);font-weight:600}
+.railnav .n{font-family:var(--mono);font-size:10.5px;color:var(--ink-3)}
+.railnav a.on .n{color:var(--fam)}
+.railnav .dot{display:inline-block;width:5px;height:5px;border-radius:99px;background:var(--verify);margin-left:5px;vertical-align:middle;opacity:0}
+.railnav a.has .dot{opacity:1}
+
+/* ---------- hero ---------- */
+.hero{border:1px solid var(--rule);background:var(--panel);padding:34px 34px 30px;margin-bottom:24px;position:relative}
+.hero:before{content:"";position:absolute;inset:7px;border:1px solid var(--rule);pointer-events:none;opacity:.45}
+.kicker{font-family:var(--display);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3);margin:0 0 12px}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(30px,4.3vw,50px);line-height:1;letter-spacing:-.037em;margin:0 0 14px;max-width:19ch}
+.lede{max-width:63ch;margin:0 0 28px;color:var(--ink-2);font-size:18px}
+mark{background:linear-gradient(100deg,transparent 2%,var(--marker) 2%,var(--marker) 98%,transparent 98%);color:inherit;padding:0 2px}
+
+.sheet{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:7px;margin-bottom:30px}
+.tile{position:relative;display:block;text-decoration:none;color:var(--ink);background:var(--panel-2);
+  border:1px solid var(--rule);border-top:3px solid var(--fam);padding:10px 11px 11px;min-height:82px;transition:transform .12s,background .12s}
+.tile:hover{background:#fff;transform:translateY(-2px)}
+.tile .n{font-family:var(--mono);font-size:10px;color:var(--fam);letter-spacing:.05em}
+.tile .p{font-family:var(--display);font-size:12.5px;font-weight:600;line-height:1.2;margin-top:5px;display:block}
+.tile .s{font-family:var(--display);font-size:11px;color:var(--ink-3);line-height:1.25;display:block;margin-top:2px}
+.tile .shot{position:absolute;right:8px;bottom:8px;width:5px;height:5px;border-radius:99px;background:var(--verify);opacity:0}
+.tile.has .shot{opacity:1}
+
+.router{border-top:1px solid var(--rule);padding-top:22px}
+.router h2{font-family:var(--display);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);font-weight:600;margin:0 0 13px}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{font-family:var(--display);font-size:13.5px;font-weight:600;padding:8px 14px;cursor:pointer;
+  border:1px solid var(--ink);background:transparent;color:var(--ink);border-radius:2px}
+.chip:hover{background:var(--ink);color:var(--panel)}
+.chip[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#fff}
+.routeout ol{list-style:none;margin:16px 0 0;padding:0;display:grid;gap:7px}
+.routeout li{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:baseline;font-size:16px}
+.routeout .n{font-family:var(--mono);font-size:11px;color:var(--accent)}
+.routeout .why{color:var(--ink-3);font-size:14px}
+
+.rules{border:1px solid var(--rule);border-left:3px solid var(--ink);background:var(--panel-2);padding:22px 26px;margin-bottom:32px}
+.rules h2{font-family:var(--display);font-size:12px;letter-spacing:.15em;text-transform:uppercase;margin:0 0 12px;color:var(--ink-3)}
+.rules ol{margin:0;padding-left:20px;display:grid;gap:7px;max-width:80ch}
+.rules li::marker{font-family:var(--mono);font-size:12px;color:var(--accent)}
+
+/* ---------- section ---------- */
+.sec{border:1px solid var(--rule);border-top:3px solid var(--fam);background:var(--panel);margin-bottom:20px;scroll-margin-top:76px}
+.sec-head{padding:22px 30px 20px;border-bottom:1px solid var(--rule)}
+.sec-num{font-family:var(--mono);font-size:11px;color:var(--fam);letter-spacing:.06em}
+.sec-plat{font-family:var(--display);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-3);margin-left:12px}
+.sec h3{font-family:var(--display);font-weight:800;font-size:26px;letter-spacing:-.026em;line-height:1.12;margin:9px 0 8px}
+.purpose{margin:0;max-width:71ch;color:var(--ink-2)}
+.sec-body{padding:24px 30px 28px}
+
+.verdict{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px}
+@media(max-width:780px){.verdict{grid-template-columns:1fr}}
+.vbox{padding:14px 16px;border-radius:2px}
+.vbox h4{font-family:var(--display);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;margin:0 0 9px}
+.vbox ul{margin:0;padding-left:17px;display:grid;gap:5px;font-size:15.5px}
+.v-yes{background:var(--verify-soft);border:1px solid #B9D6CF} .v-yes h4{color:var(--verify)}
+.v-no{background:var(--warn-soft);border:1px solid #E7C6BD} .v-no h4{color:var(--warn)}
+
+.blockhead{font-family:var(--display);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-3);
+  margin:28px 0 12px;padding-bottom:6px;border-bottom:1px solid var(--rule);display:flex;align-items:center;gap:10px}
+.steps{list-style:none;counter-reset:s;margin:0;padding:0;display:grid;gap:15px}
+.steps li{counter-increment:s;display:grid;grid-template-columns:30px 1fr;gap:13px;align-items:start;position:relative}
+.steps li:before{content:counter(s,decimal-leading-zero);font-family:var(--mono);font-size:11px;color:var(--fam);
+  border:1px solid var(--rule);background:var(--panel-2);padding:4px 0;text-align:center;margin-top:3px}
+.steps .txt{max-width:77ch}
+.steps .txt p{margin:0}
+
+code,.op{font-family:var(--mono);font-size:13.5px}
+.inline{font-family:var(--mono);font-size:13.5px;background:var(--panel-2);border:1px solid var(--rule);padding:1px 5px;border-radius:2px;white-space:nowrap}
+table.ops{width:100%;border-collapse:collapse}
+table.ops td{border-bottom:1px solid var(--rule);padding:8px 10px;vertical-align:top;font-size:15.5px}
+table.ops tr:last-child td{border-bottom:0}
+table.ops td:first-child{width:38%;padding-left:0}
+.copy{font-family:var(--mono);font-size:13px;background:var(--panel-2);border:1px solid var(--rule);padding:4px 8px;
+  border-radius:2px;cursor:pointer;text-align:left;color:var(--ink);max-width:100%;word-break:break-word;line-height:1.45;position:relative}
+.copy:hover{border-color:var(--fam);background:var(--accent-soft)}
+.copy.done{border-color:var(--verify);background:var(--verify-soft)}
+.copy.done:after{content:"copied";position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:9px;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--verify);background:var(--verify-soft);padding-left:6px}
+
+/* ---------- slots ---------- */
+.slots{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(290px,1fr))}
+figure.slot{margin:0;border:1px solid var(--rule);background:var(--panel-2);overflow:hidden;position:relative}
+figure.slot img{display:block;width:100%;height:auto}
+figure.slot .drop{display:none}
+figure.slot.empty img{display:none}
+figure.slot.empty .drop{display:grid;place-items:center;gap:8px;min-height:186px;padding:22px;position:relative;
+  background:
+    linear-gradient(var(--rule),var(--rule)) left 13px top 13px/17px 1px no-repeat,
+    linear-gradient(var(--rule),var(--rule)) left 13px top 13px/1px 17px no-repeat,
+    linear-gradient(var(--rule),var(--rule)) right 13px top 13px/17px 1px no-repeat,
+    linear-gradient(var(--rule),var(--rule)) right 13px top 13px/1px 17px no-repeat,
+    linear-gradient(var(--rule),var(--rule)) left 13px bottom 13px/17px 1px no-repeat,
+    linear-gradient(var(--rule),var(--rule)) left 13px bottom 13px/1px 17px no-repeat,
+    linear-gradient(var(--rule),var(--rule)) right 13px bottom 13px/17px 1px no-repeat,
+    linear-gradient(var(--rule),var(--rule)) right 13px bottom 13px/1px 17px no-repeat}
+figure.slot.over{border-color:var(--fam);background:var(--accent-soft)}
+.drop .path{font-family:var(--mono);font-size:12px;color:var(--ink-2);background:var(--panel);border:1px solid var(--rule);padding:4px 8px;word-break:break-all;text-align:center}
+.drop .hint{font-family:var(--display);font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+figure.slot figcaption{font-size:14px;color:var(--ink-2);padding:10px 12px;border-top:1px solid var(--rule);background:var(--panel)}
+figure.slot .tag{position:absolute;left:0;top:0;font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;
+  background:var(--fam);color:#fff;padding:3px 7px;z-index:2}
+figure.slot.pending figcaption:after{content:" — unsaved, press Save";color:var(--warn)}
+.slotbar{display:none;gap:6px;padding:8px 10px;border-top:1px solid var(--rule);background:var(--panel)}
+body.edit .slotbar{display:flex;flex-wrap:wrap;align-items:center}
+.slotbar .fn{font-family:var(--mono);font-size:11.5px;color:var(--ink-2);flex:1;min-width:120px}
+
+.notes{margin:24px 0 0;padding:16px 18px;border:1px dashed var(--rule);background:var(--panel-2)}
+.notes h4{font-family:var(--display);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin:0 0 9px}
+.notes ul{margin:0;padding-left:17px;display:grid;gap:6px;font-size:15.5px;max-width:82ch}
+.links{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.links a{font-family:var(--display);font-size:13px;font-weight:600;text-decoration:none;color:var(--ink);
+  border:1px solid var(--rule);background:var(--panel-2);padding:6px 11px;border-radius:2px}
+.links a:hover{border-color:var(--fam);color:var(--fam);background:var(--accent-soft)}
+.links a:after{content:" ↗";opacity:.5}
+
+footer{border-top:1px solid var(--rule);margin-top:42px;padding-top:22px;color:var(--ink-3);font-size:14.5px;max-width:76ch}
+.noresult{padding:40px;text-align:center;font-family:var(--display);color:var(--ink-3);display:none}
+
+/* ---------- edit mode ---------- */
+.ed{display:none}
+body.edit .ed{display:inline-flex}
+body.edit [contenteditable]{outline:1px dashed transparent;border-radius:2px}
+body.edit [contenteditable]:hover{outline-color:var(--rule);background:rgba(255,255,255,.6)}
+body.edit [contenteditable]:focus{outline:2px solid var(--fam);background:#fff}
+body.edit [contenteditable]:empty:before{content:attr(data-ph);color:var(--ink-3);font-style:italic}
+body.edit .copy{cursor:text}
+.mini{font-family:var(--display);font-size:11px;font-weight:600;line-height:1;padding:4px 7px;border:1px solid var(--rule);
+  background:var(--panel);color:var(--ink-2);border-radius:2px;cursor:pointer;align-items:center;gap:4px}
+.mini:hover{border-color:var(--ink);color:var(--ink)}
+.mini.del{color:var(--warn)}
+.mini.del:hover{background:var(--warn);border-color:var(--warn);color:#fff}
+.rowdel{position:absolute;left:-26px;top:2px}
+body.edit .steps li{padding-left:0}
+li.row{position:relative}
+.addbar{margin-top:10px;display:none;gap:6px}
+body.edit .addbar{display:flex;flex-wrap:wrap}
+.secbar{display:none;gap:6px;margin-top:12px}
+body.edit .secbar{display:flex;flex-wrap:wrap}
+body.edit .sec{border-left:3px solid var(--fam)}
+
+@media(max-width:1000px){
+  .shell{display:block}
+  .rail{position:static;width:auto;max-height:none;border-right:0;border-bottom:1px solid var(--rule);padding:18px}
+  .main{padding:20px 16px 90px}
+  .railnav{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:2px}
+  .hero{padding:24px 18px}
+  .sec-head,.sec-body{padding-left:18px;padding-right:18px}
+  .rowdel{position:static;margin-bottom:6px}
+}
+@media print{
+  .rail,.router,.finder,.links,.topbar,.helpbox,.sheet,.ed,.slotbar{display:none!important}
+  body{background:#fff;font-size:11pt}
+  .sec,.hero,.rules{border-color:#999;break-inside:avoid;page-break-inside:avoid}
+  .main{padding:0}
+  figure.slot.empty .drop{min-height:70px}
+}
+</style>
+
+<style id="aurora-redesign">
+/* Aurora newsroom redesign — inspired by the supplied editorial reference */
+:root{
+  --paper:#F1F4FC; --panel:rgba(255,255,255,.88); --panel-2:#F5F6FC;
+  --ink:#151925; --ink-2:#555E73; --ink-3:#858DA1; --rule:#DDE2EF;
+  --marker:#EEE7FF; --accent:#6F4BE8; --accent-soft:#ECE7FF;
+  --warn:#A34634; --warn-soft:#F9E8E3; --verify:#167565; --verify-soft:#E3F2EE;
+  --rail:330px;
+}
+body{
+  background:
+    radial-gradient(circle at 42% 10%,rgba(201,190,255,.38),transparent 28rem),
+    radial-gradient(circle at 8% 42%,rgba(213,230,255,.46),transparent 32rem),
+    linear-gradient(135deg,#F7F8FE 0%,#EEF2FB 52%,#F5F2FC 100%);
+  background-attachment:fixed;
+}
+.topbar{top:0;padding:11px 22px;background:rgba(247,249,255,.82);border:0;box-shadow:0 1px 0 rgba(102,112,145,.12);backdrop-filter:blur(20px);gap:9px}
+.tb-title{margin-right:4px;background:#fff;border:1px solid rgba(117,127,160,.16);box-shadow:0 7px 22px rgba(63,69,97,.08);padding:8px 13px;border-radius:999px}
+.tb-title:before{content:"✓";display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;font-size:11px}
+.tb-title em{display:none}
+.topchips{display:flex;gap:7px;align-items:center;overflow-x:auto;scrollbar-width:none;margin-right:auto}
+.topchips::-webkit-scrollbar{display:none}
+.topchips a{font-family:var(--display);font-size:11.5px;font-weight:600;text-decoration:none;color:var(--ink-2);padding:8px 11px;border-radius:999px;background:rgba(255,255,255,.64);border:1px solid rgba(117,127,160,.12);white-space:nowrap}
+.topchips a:hover{background:#fff;color:var(--accent);box-shadow:0 8px 20px rgba(72,73,120,.08)}
+.btn{border:0;border-radius:999px;padding:8px 13px;background:rgba(255,255,255,.7);box-shadow:inset 0 0 0 1px rgba(117,127,160,.16)}
+.btn:hover{background:var(--accent);color:#fff;box-shadow:none}
+.meter{background:rgba(255,255,255,.62);padding:6px 9px;border-radius:999px}.meter .bar{background:#E3E6F0}.meter .bar i{background:linear-gradient(90deg,#8C69F1,#5F42D8)}
+.shell{max-width:1580px;display:grid;grid-template-columns:minmax(0,1fr) var(--rail);gap:22px;padding:22px 24px 0}
+.main{order:1;padding:0 0 120px}.rail{order:2;width:auto;flex:none;top:76px;max-height:calc(100vh - 96px);padding:16px;border:0;border-radius:26px;background:rgba(250,251,255,.82);box-shadow:0 18px 55px rgba(56,61,92,.12);backdrop-filter:blur(18px)}
+.rail-feature{position:relative;overflow:hidden;padding:19px 18px 17px;margin-bottom:14px;border-radius:20px;color:#fff;background:linear-gradient(145deg,#1F2333 0%,#343052 52%,#7954E9 140%);box-shadow:0 14px 28px rgba(59,46,113,.22)}
+.rail-feature:after{content:"";position:absolute;width:150px;height:150px;right:-45px;top:-55px;border-radius:50%;background:radial-gradient(circle at 35% 35%,rgba(255,255,255,.95),rgba(180,151,255,.55) 18%,rgba(112,67,225,.28) 49%,transparent 70%);filter:blur(2px)}
+.rail-feature>*{position:relative;z-index:1}.rail-feature .rf-k{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;opacity:.68}.rail-feature h3{font-family:var(--display);font-size:21px;line-height:1.08;margin:12px 0 8px;max-width:12ch}.rail-feature p{font-family:var(--display);font-size:12.5px;line-height:1.45;margin:0 0 14px;color:rgba(255,255,255,.73);max-width:24ch}.rail-feature a{font-family:var(--display);font-size:12px;font-weight:700;text-decoration:none;color:#fff;border-bottom:1px solid rgba(255,255,255,.4)}
+.finder input{border:0;border-radius:14px;background:#fff;box-shadow:inset 0 0 0 1px rgba(117,127,160,.14);padding:11px 12px 11px 33px}
+.famhead{margin-top:18px}.railnav a{border-left:0;border-radius:13px;padding:8px 9px}.railnav a:hover,.railnav a.on{background:#fff;box-shadow:0 8px 20px rgba(72,73,120,.08)}.railnav a.on{color:var(--accent)}
+.hero{isolation:isolate;min-height:525px;border:0;border-radius:30px;background:linear-gradient(126deg,rgba(255,255,255,.96),rgba(239,243,255,.85));box-shadow:0 20px 65px rgba(63,68,104,.11);padding:52px 46px 34px;overflow:hidden}
+.hero:before{content:"";position:absolute;z-index:-1;width:390px;height:390px;left:55%;top:54px;inset:auto;border:0;border-radius:50%;opacity:1;background:radial-gradient(circle at 48% 42%,rgba(255,255,255,.98) 0 5%,rgba(218,205,255,.72) 14%,rgba(121,75,226,.55) 28%,rgba(114,73,218,.18) 48%,rgba(122,98,225,.04) 67%,transparent 72%);filter:blur(.2px);box-shadow:0 0 80px rgba(119,79,225,.18)}
+.hero:after{content:"";position:absolute;z-index:-1;width:430px;height:430px;left:53.5%;top:35px;border-radius:50%;background:repeating-radial-gradient(circle,transparent 0 38px,rgba(122,93,224,.10) 39px 40px,transparent 41px 52px);filter:blur(.3px)}
+.kicker{display:inline-flex;padding:7px 11px;border-radius:999px;background:#F0F2FA;color:var(--ink-2);letter-spacing:.12em;margin-bottom:22px}
+h1{font-size:clamp(38px,5vw,64px);max-width:13ch;line-height:.98;letter-spacing:-.048em;margin-bottom:19px}.lede{font-family:var(--display);font-size:17px;line-height:1.58;max-width:40ch;margin-bottom:58px}mark{background:var(--accent-soft);border-radius:5px;padding:1px 5px}
+.sheet{position:relative;z-index:2;grid-template-columns:repeat(auto-fill,minmax(122px,1fr));gap:8px;margin-bottom:26px}.tile{border:0;border-top:0;border-radius:15px;background:rgba(255,255,255,.78);box-shadow:inset 0 0 0 1px rgba(122,132,164,.13);min-height:77px;padding:11px 12px}.tile:hover{background:#fff;transform:translateY(-2px);box-shadow:0 12px 25px rgba(69,73,110,.11)}.tile .n{color:var(--accent)}
+.router{position:relative;z-index:2}.chip{border:0;border-radius:999px;background:#fff;box-shadow:inset 0 0 0 1px rgba(112,122,154,.18);padding:9px 15px}.chip:hover,.chip[aria-pressed=true]{background:var(--accent);color:#fff;box-shadow:none}
+.rules,.sec{border:0;border-radius:25px;background:rgba(255,255,255,.88);box-shadow:0 16px 46px rgba(64,69,102,.09);overflow:hidden}.rules{border-left:0;padding:25px 29px}.sec{border-top:0;margin-bottom:22px}.sec-head{padding:26px 31px 22px;background:linear-gradient(120deg,rgba(255,255,255,.78),rgba(244,245,253,.72))}.sec h3{font-size:30px}.sec-num{display:inline-flex;padding:5px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent)}.sec-body{padding:26px 31px 31px}
+.verdict{gap:12px}.vbox{border:0;border-radius:18px;padding:17px 18px}.v-yes{background:#EAF6F2}.v-no{background:#FAECE8}.blockhead{border-bottom-color:#E4E7F0;margin-top:31px}.steps li:before{border:0;border-radius:9px;background:#F0EDFF;color:var(--accent);font-weight:600}.copy{border:0;border-radius:10px;background:#F0F2F8;padding:7px 10px}.copy:hover{background:var(--accent-soft);color:var(--accent)}
+.slots{grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:18px}figure.slot{border:0;border-radius:19px;background:#F4F5FA;box-shadow:inset 0 0 0 1px rgba(118,128,160,.13);overflow:hidden}figure.slot img{width:100%;aspect-ratio:16/10;object-fit:cover;background:#E9ECF5}figure.slot figcaption{font-family:var(--display);font-size:13px;line-height:1.45;background:#fff;border:0;padding:12px 14px;min-height:62px}figure.slot .tag{left:10px;top:10px;border-radius:999px;background:rgba(25,27,39,.82);backdrop-filter:blur(8px)}
+.notes{border:0;border-radius:18px;background:#F4F5FA}.links a{border:0;border-radius:999px;background:#F0F2F8;padding:8px 12px}.links a:hover{background:var(--accent-soft);color:var(--accent)}
+footer{border-top-color:#D8DDEB}
+@media(max-width:1100px){.shell{display:block;padding:16px}.rail{position:static;max-height:none;margin-bottom:18px}.main{padding:0 0 90px}.railnav{grid-template-columns:repeat(auto-fill,minmax(185px,1fr))}.rail-feature{display:none}.hero:before,.hero:after{left:auto;right:-80px;opacity:.48}}
+@media(max-width:720px){.topchips,.meter{display:none}.topbar{padding:9px 11px}.shell{padding:10px}.hero{padding:31px 20px 24px;min-height:auto}.hero:before,.hero:after{display:none}.lede{margin-bottom:28px}.sheet{grid-template-columns:repeat(2,1fr)}.sec-head,.sec-body{padding-left:19px;padding-right:19px}.slots{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="tb-title">Verification Desk <em>fact-checking handbook</em></div>
+  <nav class="topchips" aria-label="Handbook shortcuts">
+    <a href="#x-operators">Social +</a><a href="#google-operators">Search +</a><a href="#reverse-image">Forensics +</a><a href="#ai-detection">AI +</a><a href="#mapping">Location +</a>
+  </nav>
+  <div class="meter" title="Screenshot slots filled">
+    <span id="mcount">0/0</span><span class="bar"><i id="mbar"></i></span>
+  </div>
+  <span class="status" id="status">viewing</span>
+  <a class="btn ghost" href="index.html" title="Back to the mobile field guide">← Field guide</a>
+  <button class="btn ghost" id="btnHelp" type="button">?</button>
+  <button class="btn" id="btnFolder" type="button">Connect folder</button>
+  <button class="btn" id="btnEdit" type="button">Edit content</button>
+  <button class="btn" id="btnSave" type="button">Save</button>
+</div>
+
+<div class="helpbox" id="help">
+  <div class="in">
+    <h4>Editing and saving</h4>
+    <ul>
+      <li><strong>Connect folder</strong> (Chrome or Edge) — pick the folder this file sits in. Save then writes straight back into this HTML file, and dropped screenshots are written into <code>images/</code> automatically. Grant permission once per session.</li>
+      <li><strong>If the folder button does nothing</strong>, you are on <code>file://</code> or a browser without the File System Access API. Serve the folder instead — <code>python3 -m http.server 8000</code> — and open <code>http://localhost:8000</code>. Or just use Save, which downloads a rebuilt copy of this file with every edit and image baked in; replace the old file with it.</li>
+      <li><strong>Edit content</strong> turns every heading, step, caption and note into an editable field. Add and remove steps, operators, notes and whole tools with the small buttons that appear. Ctrl/Cmd+B bolds.</li>
+      <li><strong>Screenshots</strong> — drag an image onto any slot. With a folder connected it lands in <code>images/</code> under the filename shown; without one it is embedded in the file itself on save.</li>
+      <li>Nothing is stored in the browser. Unsaved work is lost on reload, so Save before you close.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="shell">
+<aside class="rail">
+  <section class="rail-feature">
+    <span class="rf-k">Recommended first check</span>
+    <h3>Reverse-search the image.</h3>
+    <p>It is the quickest way to expose recycled footage before deeper analysis.</p>
+    <a href="#reverse-image">Open section 13 →</a>
+  </section>
+  <div class="finder">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+    <input id="finder" type="search" placeholder="Search this handbook…" aria-label="Filter the handbook">
+  </div>
+  <div id="railnav"></div>
+</aside>
+
+<main class="main">
+  <section class="hero">
+    <p class="kicker">Internal · verification workflow</p>
+    <h1 data-b="meta.h1" data-ph="Headline">Start from what you have, not from the tool.</h1>
+    <p class="lede" data-b="meta.lede" data-ph="Intro">Seventeen tools, each with the same three questions answered up front: what it proves, what it can't, and the exact clicks to get there. <mark>Pick what's in front of you</mark> and the desk will tell you which sections to open, in order.</p>
+    <div class="sheet" id="sheet"></div>
+    <div class="router">
+      <h2>What landed on your desk?</h2>
+      <div class="chips" id="routerchips"></div>
+      <div class="routeout" id="routeout"></div>
+    </div>
+  </section>
+
+  <section class="rules">
+    <h2>Before you touch anything</h2>
+    <ol id="ruleslist"></ol>
+    <div class="addbar"><button class="mini" data-act="add" data-list="rules" type="button">+ ground rule</button></div>
+  </section>
+
+  <div id="sections"></div>
+  <div class="noresult" id="noresult">Nothing matches that filter.</div>
+  <div class="secbar" style="margin-top:18px"><button class="mini" data-act="addsection" type="button">+ add a tool</button></div>
+
+  <footer>
+    <p><strong>Maintaining this page.</strong> Turn on Edit content to change any text in place. Connect the folder this file lives in and Save writes back into the file itself, screenshots included; otherwise Save downloads a rebuilt copy to replace it with.</p>
+    <p>Links and interfaces last checked <span data-b="meta.reviewed" data-ph="date">3 August 2026</span>. Platforms change search behaviour without notice — re-test before running a training session.</p>
+  </footer>
+</main>
+</div>
+
+<script type="application/json" id="data">{
+ "meta": {
+  "title": "Verification Desk",
+  "subtitle": "Fact-checking tools handbook",
+  "reviewed": "5 August 2026"
+ },
+ "sections": [
+  {
+   "id": "x-operators",
+   "num": "01",
+   "platform": "X / Twitter",
+   "title": "Advanced search operators on X",
+   "purpose": "X's search box accepts a query language far more precise than the UI suggests. It's the fastest way to find who said something first, and to prove a claim was or wasn't posted at a given time.",
+   "yes": [
+    "Whether an account posted about a topic, and exactly when",
+    "The earliest version of a post you can still see",
+    "Every reply or quote around a viral post"
+   ],
+   "no": [
+    "Anything from deleted, suspended or protected accounts",
+    "Complete coverage — the index is partial and skews recent",
+    "Reliable results while logged out"
+   ],
+   "steps": [
+    {
+     "t": "Open the advanced search form at x.com/search-advanced and build a first query there. It writes the operator syntax for you — read what appears in the search bar, that's how you learn the grammar."
+    },
+    {
+     "t": "Switch the results to the <b>Latest<\/b> tab. The default Top tab is ranked and will hide older matches."
+    },
+    {
+     "t": "Now edit the query directly in the search bar. This is where the real precision is: combine operators freely, one space between each.",
+     "c": "from:username \"exact phrase\" since:2026-01-01 until:2026-02-01 -filter:replies"
+    },
+    {
+     "t": "Narrow by engagement when a claim went viral and you want the version that spread, not the original.",
+     "c": "keyword min_faves:500 filter:videos"
+    },
+    {
+     "t": "For hour-level precision, swap the date operators for Unix timestamps. Useful when you need to prove what was posted before an official announcement.",
+     "c": "keyword since_time:1767225600 until_time:1767229200"
+    },
+    {
+     "t": "Pull the whole conversation around a single post: open the post, copy the numeric ID from its URL, and search it as a conversation.",
+     "c": "conversation_id:1234567890123456789"
+    },
+    {
+     "t": "Archive every result you'll cite before you close the tab."
+    }
+   ],
+   "ops": [
+    [
+     "from:account",
+     "Posts by that account"
+    ],
+    [
+     "to:account",
+     "Replies directed at that account"
+    ],
+    [
+     "\"exact phrase\"",
+     "Locks word order — use for quotes and slogans"
+    ],
+    [
+     "keyword1 OR keyword2",
+     "Either term. OR must be capitalised"
+    ],
+    [
+     "-keyword",
+     "Excludes. Chain several to clear out noise"
+    ],
+    [
+     "since:2026-01-01 until:2026-02-01",
+     "Date window. until: is exclusive of that day"
+    ],
+    [
+     "filter:media / filter:images / filter:videos",
+     "Only posts carrying that media type"
+    ],
+    [
+     "-filter:replies",
+     "Original posts only — cuts reply-chain clutter"
+    ],
+    [
+     "filter:links url:domain.com",
+     "Posts linking to a specific site"
+    ],
+    [
+     "min_faves:100 min_retweets:50",
+     "Engagement floors — finds the version that travelled"
+    ],
+    [
+     "lang:zh",
+     "Restricts language. Also lang:en, lang:ms, lang:ta"
+    ],
+    [
+     "list:1234567890",
+     "Searches only the accounts in one list — see 02"
+    ],
+    [
+     "filter:quote",
+     "Quote-posts only, to trace how a claim was reframed"
+    ]
+   ],
+   "images": [
+    {
+     "f": "01-x-advanced-search.webp",
+     "c": "AFP workshop slide (p. 2): the advanced-search form for building a precise X query.",
+     "data": ""
+    },
+    {
+     "f": "01-x-latest-tab.webp",
+     "c": "AFP workshop slide (p. 2): X operator families, with the reminder to switch results to Latest.",
+     "data": ""
+    }
+   ],
+   "notes": [
+    "The <span class='inline'>geocode:<\/span> operator still parses but returns almost nothing since the API changes — treat any location claim from it as unverified.",
+    "Operators are case-insensitive except OR, which must be uppercase.",
+    "Searching while logged out returns a fraction of the index. Use a dedicated research account."
+   ],
+   "links": [
+    [
+     "Advanced search form",
+     "https://x.com/search-advanced"
+    ],
+    [
+     "archive.today",
+     "https://archive.today"
+    ]
+   ],
+   "tags": "twitter x operators from since until filter min_faves conversation_id",
+   "family": "global",
+   "short": "Advanced search"
+  },
+  {
+   "id": "x-lists",
+   "num": "02",
+   "platform": "X / Twitter",
+   "title": "Public and private Lists on X",
+   "purpose": "A List is a saved set of accounts you can monitor and search as a group without following anyone. It turns a beat — ministries, hospitals, a company's executives — into a single searchable feed.",
+   "yes": [
+    "A chronological feed of a defined group, unpolluted by the algorithm",
+    "Keyword search restricted to accounts you trust",
+    "Fast triage during a breaking event"
+   ],
+   "no": [
+    "Silent monitoring via a public list — members and anyone else can see it",
+    "Access to protected accounts you don't follow",
+    "A permanent record — members can be removed and lists deleted"
+   ],
+   "steps": [
+    {
+     "t": "Go to your profile, open <b>Lists<\/b>, and create one. Name it for the beat, not the event: <i>SG official accounts<\/i> outlives <i>Flood coverage<\/i>."
+    },
+    {
+     "t": "<b>Turn on Private before you add anyone.<\/b> A private list doesn't appear on your profile and members aren't notified. A public list shows on the member's profile under 'Lists they're on' — that's how you tip off a target without meaning to."
+    },
+    {
+     "t": "Add accounts by searching in the Manage members panel. You don't need to follow them, and adding doesn't count as a follow."
+    },
+    {
+     "t": "Open the list and copy the numeric ID from the URL — that's what search needs.",
+     "c": "https://x.com/i/lists/1789456123456789012"
+    },
+    {
+     "t": "Now search inside only those accounts, combining with any operator from section 01.",
+     "c": "list:1789456123456789012 \"haze\" since:2026-06-01"
+    },
+    {
+     "t": "Pin the list to your home timeline so it sits as a swipeable tab during a live event."
+    },
+    {
+     "t": "Check which lists an account already appears on — other journalists' public lists are a free, curated source map for a beat you're new to."
+    }
+   ],
+   "ops": [
+    [
+     "list:1789456123456789012",
+     "Restrict any search to that list's members"
+    ],
+    [
+     "list:ID filter:media since:2026-07-01",
+     "Everything visual from your beat since a date"
+    ],
+    [
+     "list:ID -filter:replies min_faves:20",
+     "Signal only, during a fast-moving event"
+    ]
+   ],
+   "images": [
+    {
+     "f": "02-x-list-private.webp",
+     "c": "AFP workshop slide (p. 3): public versus private X Lists and the visibility implications.",
+     "data": ""
+    },
+    {
+     "f": "02-x-list-id.webp",
+     "c": "AFP workshop slide (p. 3): using Lists to group and monitor accounts by beat.",
+     "data": ""
+    }
+   ],
+   "notes": [
+    "Switching a private list to public retroactively exposes the whole membership. Never flip it back and forth.",
+    "Build one list per beat and keep them; lists you maintain for a year become genuinely valuable during a breaking story."
+   ],
+   "links": [
+    [
+     "Your lists",
+     "https://x.com/i/lists"
+    ]
+   ],
+   "tags": "lists private public monitoring beat list: id",
+   "family": "global",
+   "short": "Lists"
+  },
+  {
+   "id": "google-operators",
+   "num": "03",
+   "platform": "Google Search",
+   "title": "Search operators on Google Search",
+   "purpose": "Operators turn Google from a suggestion engine into a retrieval tool. Most of the platform-specific searching in this handbook eventually falls back to a well-built Google query.",
+   "yes": [
+    "Documents and pages a platform's own search will not surface",
+    "Whether a phrase existed on the open web before a given date",
+    "Files — PDFs, spreadsheets, slides — that were never meant to be found"
+   ],
+   "no": [
+    "Anything behind a login (WeChat, most of Weibo, private groups)",
+    "A trustworthy 'first published' date — indexing dates lag and shift",
+    "Complete coverage of Chinese-language sources — use Baidu as well, see 04"
+   ],
+   "steps": [
+    {
+     "t": "Start with the phrase in quotes. If it returns nothing, the claim's exact wording may be invented — that alone is a finding.",
+     "c": "\"exact claim as it was worded\""
+    },
+    {
+     "t": "Pin it to a domain, or a whole class of domains.",
+     "c": "site:gov.sg \"carbon tax\" filetype:pdf"
+    },
+    {
+     "t": "Use the platform sites as a back door when their own search is weak — this is the standard workaround for Threads, TikTok and Telegram.",
+     "c": "site:threads.com \"keyword\" OR site:tiktok.com \"keyword\""
+    },
+    {
+     "t": "Bound it in time. <span class='inline'>before:<\/span> and <span class='inline'>after:<\/span> work inline and are far quicker than the Tools menu.",
+     "c": "claim after:2026-05-01 before:2026-06-15"
+    },
+    {
+     "t": "Switch on <b>Verbatim<\/b> (Tools → All results → Verbatim) when Google keeps 'helpfully' substituting synonyms. Essential for names and transliterations."
+    },
+    {
+     "t": "When a page is gone, don't reach for <span class='inline'>cache:<\/span> — Google retired it. Paste the URL into the Wayback Machine instead.",
+     "c": "https://web.archive.org/web/*/example.com/page"
+    },
+    {
+     "t": "Loosen a stubborn query with proximity instead of quotes when you know two names appear together but not how.",
+     "c": "\"minister\" AROUND(5) \"resignation\""
+    }
+   ],
+   "ops": [
+    [
+     "\"exact phrase\"",
+     "Word-for-word match"
+    ],
+    [
+     "site:domain.com",
+     "One site. Also site:*.edu.sg for a whole class"
+    ],
+    [
+     "-site:domain.com",
+     "Excludes a site — good for clearing out aggregators"
+    ],
+    [
+     "filetype:pdf",
+     "Also xlsx, docx, pptx, csv"
+    ],
+    [
+     "intitle: / allintitle:",
+     "Term must be in the page title"
+    ],
+    [
+     "inurl:",
+     "Term must be in the URL — finds admin pages, archives, feeds"
+    ],
+    [
+     "intext:",
+     "Term must be in the body, not just navigation"
+    ],
+    [
+     "before:2026-01-01 after:2025-06-01",
+     "Date bounds, YYYY-MM-DD"
+    ],
+    [
+     "term1 OR term2",
+     "Either. Pipe | works too"
+    ],
+    [
+     "( )",
+     "Groups terms: (haze OR smoke) site:gov.sg"
+    ],
+    [
+     "*",
+     "Wildcard for one or more words inside a quoted phrase"
+    ],
+    [
+     "AROUND(5)",
+     "Two terms within five words of each other"
+    ],
+    [
+     "related:domain.com",
+     "Sites Google considers similar — finds mirror and clone sites"
+    ]
+   ],
+   "images": [
+    {
+     "f": "03-google-tools-verbatim.webp",
+     "c": "AFP workshop slide (p. 5): a compact reference to Google search operators.",
+     "data": ""
+    },
+    {
+     "f": "03-google-site-filetype.webp",
+     "c": "AFP workshop slide (p. 5): operator examples including site:, filetype:, exclusion and exact phrases.",
+     "data": ""
+    }
+   ],
+   "notes": [
+    "<span class='inline'>before:<\/span> and <span class='inline'>after:<\/span> filter on Google's estimated date, not the publication date. Confirm the date on the page itself.",
+    "Personalisation and location shift results. For a clean read, use a private window and check what changes."
+   ],
+   "links": [
+    [
+     "Wayback Machine",
+     "https://web.archive.org"
+    ]
+   ],
+   "tags": "google operators site filetype intitle inurl before after verbatim dork",
+   "family": "open",
+   "short": "Operators"
+  },
+  {
+   "id": "baidu",
+   "num": "04",
+   "platform": "Baidu · 百度",
+   "title": "Advanced search filters on Baidu",
+   "purpose": "Google indexes the Chinese-language web thinly. For mainland sources — local government notices, 贴吧 threads, forum posts, company filings — Baidu is where the material actually is.",
+   "yes": [
+    "Mainland Chinese pages Google never indexed",
+    "Local government and institutional notices (site:gov.cn)",
+    "Cached copies of pages taken down since (百度快照)"
+   ],
+   "no": [
+    "Anything on WeChat, or most of Weibo",
+    "Neutral ranking — paid placements sit at the top",
+    "Content removed by censorship, which vanishes from the index entirely"
+   ],
+   "steps": [
+    {
+     "t": "<b>Search in simplified Chinese.<\/b> A traditional-character or English query will return a fraction of what exists. Convert your terms first, and try both the mainland and local phrasing of a name."
+    },
+    {
+     "t": "Use the advanced search form to get the filter grammar right, then edit the query directly.",
+     "c": "https://www.baidu.com/gaoji/advanced.html"
+    },
+    {
+     "t": "Apply the time filter under 搜索工具 → 时间不限. The options are 一天内 (24h), 一周内, 一月内, 一年内 and 自定义 for a custom range."
+    },
+    {
+     "t": "Restrict to a domain or a document type — the same syntax you already know.",
+     "c": "site:gov.cn 通报 filetype:pdf"
+    },
+    {
+     "t": "Click <b>百度快照<\/b> next to a result to read Baidu's snapshot when the live page is gone or has been edited. Screenshot it immediately; snapshots also disappear."
+    },
+    {
+     "t": "Search inside 贴吧 (tieba.baidu.com) separately for forum discussion, and use 百度学术 (xueshu.baidu.com) for academic sources."
+    },
+    {
+     "t": "Read the labels. Results tagged 广告 are paid. Cross-check anything important against a second Chinese engine such as Sogou or Bing China."
+    }
+   ],
+   "ops": [
+    [
+     "site:gov.cn",
+     "One domain. Works the same as Google"
+    ],
+    [
+     "inurl: / intitle:",
+     "URL and title restriction"
+    ],
+    [
+     "filetype:pdf",
+     "Documents. Very productive on .gov.cn domains"
+    ],
+    [
+     "\"精确短语\"",
+     "Exact phrase — quotes must be around Chinese text too"
+    ],
+    [
+     "关键词 -排除词",
+     "Exclusion"
+    ],
+    [
+     "关键词1 | 关键词2",
+     "OR, written as a pipe"
+    ]
+   ],
+   "images": [
+    {
+     "f": "04-baidu-advanced-form.webp",
+     "c": "AFP workshop slide (p. 5): Baidu advanced search for mainland Chinese sources.",
+     "data": ""
+    },
+    {
+     "f": "04-baidu-time-filter.webp",
+     "c": "AFP workshop slide (p. 5): the Baidu advanced-search controls and date fields.",
+     "data": ""
+    }
+   ],
+   "notes": [
+    "Baidu's index is aggressively filtered. A blank result is not evidence that something never existed — note it and try Sogou, Bing, and Weibo search before concluding anything.",
+    "Snapshot pages (快照) are your best chance at a deleted mainland page. Capture them to archive.today the moment you find them."
+   ],
+   "links": [
+    [
+     "Baidu advanced search",
+     "https://www.baidu.com/gaoji/advanced.html"
+    ],
+    [
+     "Baidu Tieba",
+     "https://tieba.baidu.com"
+    ]
+   ],
+   "tags": "baidu 百度 高级搜索 快照 gaoji chinese site filetype",
+   "family": "open",
+   "short": "Advanced filters"
+  },
+  {
+   "id": "weibo",
+   "num": "05",
+   "platform": "Weibo · 微博",
+   "title": "Search filters and location search on Weibo",
+   "purpose": "Weibo is where mainland incidents surface first — usually as a phone video from a bystander. Its advanced search lets you bound a claim by hour and by province, which is often enough to place an event.",
+   "yes": [
+    "The earliest visible post of a video, by hour and region",
+    "Whether a topic was trending or is being astroturfed",
+    "Eyewitness accounts geographically near an incident"
+   ],
+   "no": [
+    "Deleted posts — and deletion is fast and routine",
+    "Complete results while logged out",
+    "Any guarantee the poster is where they claim to be"
+   ],
+   "steps": [
+    {
+     "t": "Go to s.weibo.com and search your keyword. Log in — logged-out results are heavily truncated."
+    },
+    {
+     "t": "Open <b>高级搜索<\/b> (advanced search) beside the results. Four filter groups matter: 类型 (type), 包含 (contains), 时间 (time) and 地点 (location)."
+    },
+    {
+     "t": "Set 类型 to 原创 (original posts) to strip reposts and find who posted first. 认证用户 restricts to verified accounts; 媒体 to media outlets."
+    },
+    {
+     "t": "Set 包含 to 含视频 or 含图片 when you're chasing a specific clip."
+    },
+    {
+     "t": "Set 时间 with hour precision — this is the strongest feature. The window is written into the URL and you can edit it directly.",
+     "c": "https://s.weibo.com/weibo?q=关键词&timescope=custom:2026-07-14-8:2026-07-14-14"
+    },
+    {
+     "t": "Set 地点 to a province and city. The URL carries a region code you can swap by hand.",
+     "c": "&region=custom:44:1"
+    },
+    {
+     "t": "For location-first searching, use the app: 发现 → 附近 → 附近的微博 shows posts by geotag around a point you can drag on the map. There is no desktop equivalent."
+    },
+    {
+     "t": "Search users separately at s.weibo.com/user, and follow the topic page for a hashtag at s.weibo.com/weibo?q=%23话题%23."
+    },
+    {
+     "t": "Archive every post you'll cite, immediately, plus the user profile page."
+    }
+   ],
+   "ops": [
+    [
+     "s.weibo.com/weibo?q=关键词",
+     "Base keyword search"
+    ],
+    [
+     "&typeall=1&suball=1",
+     "Show all types and all content"
+    ],
+    [
+     "&xsort=hot",
+     "Sort by heat instead of time"
+    ],
+    [
+     "&timescope=custom:2026-07-14-8:2026-07-14-14",
+     "Date plus hour window"
+    ],
+    [
+     "&region=custom:44:1",
+     "Province:city code — 44 is Guangdong"
+    ],
+    [
+     "#话题#",
+     "Topic pages, hash on both sides"
+    ]
+   ],
+   "images": [
+    {
+     "f": "05-weibo-advanced.webp",
+     "c": "AFP workshop slide (p. 6): Weibo advanced search filters for content type, time and account.",
+     "data": ""
+    },
+    {
+     "f": "05-weibo-nearby.webp",
+     "c": "AFP workshop slide (p. 7): Weibo location search for posts tagged to a place.",
+     "data": ""
+    }
+   ],
+   "notes": [
+    "A post that vanishes between two of your searches is itself newsworthy — screenshot with the visible timestamp and repost count each time you look.",
+    "Geotags on Weibo are user-set and trivially faked. Treat 附近 results as leads for where to look, never as location evidence.",
+    "Reposts (转发) carry the original inside them; if the original is deleted, the repost may still show its text. Search the quoted wording separately."
+   ],
+   "links": [
+    [
+     "Weibo search",
+     "https://s.weibo.com"
+    ]
+   ],
+   "tags": "weibo 微博 高级搜索 附近 timescope region nearby location",
+   "family": "china",
+   "short": "Filters + location"
+  },
+  {
+   "id": "wechat",
+   "num": "06",
+   "platform": "WeChat · 微信",
+   "title": "Searching videos on WeChat",
+   "purpose": "WeChat is a closed system with no public web index, and 视频号 (Channels) is where a lot of mainland short video now lives first. Everything here has to be done inside the app.",
+   "yes": [
+    "Whether a clip is circulating on Channels and who is pushing it",
+    "The account behind a 公众号 article and its posting history",
+    "A shareable link you can archive, extracted from inside the app"
+   ],
+   "no": [
+    "Anything at all from a browser without the app — there is no public index",
+    "Private and group chat content",
+    "Historical search — Channels search skews hard to recent and popular"
+   ],
+   "steps": [
+    {
+     "t": "Open WeChat → 发现 → <b>搜一搜<\/b> and enter the keyword. Results are split into tabs: 公众号 (official accounts), 文章 (articles), 视频号 (Channels), 小程序 (mini-programs)."
+    },
+    {
+     "t": "Open the <b>视频号<\/b> tab for video. Sort by 最新 where offered — the default sort is popularity and will bury the original upload under reposts."
+    },
+    {
+     "t": "Tap into the poster's Channels profile and scroll their full history. The upload order there is your best proxy for who had the clip first."
+    },
+    {
+     "t": "To get something out of the app, tap the share icon on a video → 复制链接 (copy link). That link opens in a browser and can be archived. Not every video allows it."
+    },
+    {
+     "t": "For articles, search 公众号 by exact account name; official-account article URLs (mp.weixin.qq.com/s/…) do open in a browser and can be archived normally."
+    },
+    {
+     "t": "When the app gives you nothing, try the open web as a fallback — reposts of WeChat video regularly end up on Weibo, Douyin and Bilibili.",
+     "c": "site:mp.weixin.qq.com \"关键词\""
+    },
+    {
+     "t": "If a clip only exists in-app, screen-record it with the account name, timestamp and view count visible in the same frame."
+    }
+   ],
+   "images": [
+    {
+     "f": "06-wechat-souyisou.webp",
+     "c": "AFP workshop slide (p. 9): in-app WeChat search and content-type filters.",
+     "data": ""
+    },
+    {
+     "f": "06-wechat-channels-sort.webp",
+     "c": "AFP workshop slide (p. 10): searching WeChat Channels and comparing recent uploads.",
+     "data": ""
+    }
+   ],
+   "notes": [
+    "WeChat re-encodes and strips metadata from everything uploaded. A file pulled from WeChat carries no usable EXIF — see 16.",
+    "Content on WeChat is removed quietly and quickly. Screen-record first, analyse second.",
+    "There is no reliable third-party WeChat search. Treat any site claiming to offer one with suspicion."
+   ],
+   "tags": "wechat 微信 视频号 搜一搜 channels 公众号 video search",
+   "family": "china",
+   "short": "Video search"
+  },
+  {
+   "id": "facebook",
+   "num": "07",
+   "platform": "Facebook",
+   "title": "Search tools for Facebook — whopostedwhat.com and sowsearch.info",
+   "purpose": "Facebook's own search dropped date filtering years ago. These two tools rebuild the missing query parameters and hand you a working Facebook search URL.",
+   "yes": [
+    "Public posts containing a keyword on one specific date",
+    "Everything one account or Page posted about a topic",
+    "Posts attached to a location's Page"
+   ],
+   "no": [
+    "Private profiles, closed groups, or anything not public",
+    "Results while logged out — both tools hand off to Facebook itself",
+    "Complete coverage; Facebook's index is patchy and inconsistent"
+   ],
+   "steps": [
+    {
+     "t": "Log into Facebook in the same browser first. Both tools build a URL and hand you over to Facebook — no session, no results."
+    },
+    {
+     "t": "On <b>whopostedwhat.com<\/b>, start with the <i>Get ID<\/i> box. Paste a profile, Page or place URL and it returns the numeric UID that every other search needs.",
+     "c": "https://www.facebook.com/zuck"
+    },
+    {
+     "t": "Use the keyword-plus-date row for the classic query: what was posted publicly about X on this exact day. You can also search between two dates."
+    },
+    {
+     "t": "Use the location row with a place UID to find posts attached to a specific place Page — useful for incident sites."
+    },
+    {
+     "t": "If the ID box returns 0, wait a few seconds and retry. That's Facebook's anti-scraping flag, not a broken tool."
+    },
+    {
+     "t": "On <b>sowsearch.info<\/b>, pick your filters — author, group, date, tagged people — and it constructs the encoded Facebook search URL for you. It's the more flexible of the two once you know what you're looking for."
+    },
+    {
+     "t": "Archive the Facebook result page and each individual post you'll cite. Search URLs expire; posts get deleted."
+    }
+   ],
+   "ops": [
+    [
+     "whopostedwhat.com",
+     "Keyword + exact date, UID lookup, location search"
+    ],
+    [
+     "sowsearch.info",
+     "Structured query builder (also mirrored at graph.tips)"
+    ],
+    [
+     "site:facebook.com \"phrase\"",
+     "Open-web fallback via Google"
+    ]
+   ],
+   "images": [
+    {
+     "f": "07-whopostedwhat.webp",
+     "c": "AFP workshop slide (p. 12): Who Posted What for a date-and-location Facebook search.",
+     "data": ""
+    },
+    {
+     "f": "07-sowsearch.webp",
+     "c": "AFP workshop slide (p. 11): Facebook search filters for finding witnesses and public posts.",
+     "data": ""
+    }
+   ],
+   "notes": [
+    "The Instagram location-by-date feature on whopostedwhat was removed in May 2021 when Facebook disabled the underlying parameter. For Instagram, use section 08.",
+    "Both tools are volunteer-run and break whenever Meta changes its URL scheme. If one fails, try the other before assuming the content doesn't exist.",
+    "For sustained research, Meta Content Library offers formal access for approved researchers — worth applying for if this becomes routine work."
+   ],
+   "links": [
+    [
+     "whopostedwhat.com",
+     "https://whopostedwhat.com/"
+    ],
+    [
+     "sowsearch.info",
+     "https://www.sowsearch.info/"
+    ]
+   ],
+   "tags": "facebook whopostedwhat sowsearch graph.tips uid date search",
+   "family": "global",
+   "short": "WhoPostedWhat"
+  },
+  {
+   "id": "instagram",
+   "num": "08",
+   "platform": "Instagram",
+   "title": "Location search on Instagram",
+   "purpose": "Instagram keeps a public page for every location tag. If an incident happened somewhere people photograph, that page is the fastest route to bystander footage.",
+   "yes": [
+    "Public posts tagged to a specific place",
+    "Bystander images from a venue during an event",
+    "Accounts that were physically at a location, or claim they were"
+   ],
+   "no": [
+    "Date filtering — Instagram removed it, so you scroll",
+    "Untagged posts, which are the majority",
+    "Proof of presence — location tags are chosen by the poster"
+   ],
+   "steps": [
+    {
+     "t": "Find the location ID. The easiest route: find any post from the place, tap the blue location name above the image, and read the ID out of the URL.",
+     "c": "https://www.instagram.com/explore/locations/95099702/mgm-grand-las-vegas/"
+    },
+    {
+     "t": "If you have no post to start from, ask Google for the location page instead.",
+     "c": "site:instagram.com/explore/locations \"Marina Bay Sands\""
+    },
+    {
+     "t": "On the location page, ignore <b>Top posts<\/b> — it's algorithmic. Scroll to <b>Most recent<\/b>, which is chronological, newest first."
+    },
+    {
+     "t": "Scroll back to the period you care about. There's no shortcut; note the last post you reached so you can resume."
+    },
+    {
+     "t": "Cross-check with the hashtag page for the same place or event.",
+     "c": "https://www.instagram.com/explore/tags/mbs/"
+    },
+    {
+     "t": "Open each candidate post, check the poster's other content for whether they were plausibly there, and reverse-image-search the frame (see 13) before believing it's original."
+    },
+    {
+     "t": "Archive the post URL and screenshot the caption, timestamp and account together."
+    }
+   ],
+   "images": [
+    {
+     "f": "08-instagram-location.webp",
+     "c": "AFP workshop slide (p. 13): Instagram location pages as a lead for nearby public posts.",
+     "data": ""
+    },
+    {
+     "f": "08-instagram-location-id.webp",
+     "c": "AFP workshop slide (p. 13): mobile Instagram location search and nearby place suggestions.",
+     "data": ""
+    }
+   ],
+   "notes": [
+    "Large venues have several overlapping location tags — check the neighbours as well as the obvious one.",
+    "Instagram tags are picked from a list by the poster; someone can tag a place from anywhere in the world. It's a lead, never a location proof.",
+    "Use a research account. Viewing a story from your work account tells the poster you were there."
+   ],
+   "links": [
+    [
+     "Instagram locations",
+     "https://www.instagram.com/explore/locations/"
+    ]
+   ],
+   "tags": "instagram location explore locations tags recent geotag",
+   "family": "global",
+   "short": "Location pages"
+  },
+  {
+   "id": "threads",
+   "num": "09",
+   "platform": "Threads",
+   "title": "Search tools on Threads",
+   "purpose": "Threads has keyword search but almost no filters, and no operator language. The workable approach is to use its Recent tab for live monitoring and Google for anything historical.",
+   "yes": [
+    "Whether a claim is circulating on Threads right now",
+    "A specific account's posting history, read manually",
+    "Cross-posted content that also exists on Instagram"
+   ],
+   "no": [
+    "Date-bounded search of any kind, natively",
+    "Operators — no from:, no since:, no exclusion",
+    "Reliable historical coverage; the native index is shallow"
+   ],
+   "steps": [
+    {
+     "t": "Search the keyword in the app or on the web, then switch the results to <b>Recent<\/b>. The default is ranked and will hide the small accounts you usually want."
+    },
+    {
+     "t": "The filter is carried in the URL, so you can bookmark a monitoring query.",
+     "c": "https://www.threads.com/search?q=keyword&filter=recent"
+    },
+    {
+     "t": "For anything older than a few days, go to Google instead — this is the real workaround for the missing operators.",
+     "c": "site:threads.com \"exact phrase\" after:2026-05-01"
+    },
+    {
+     "t": "To search one account's posts, combine the profile path with your keyword in Google.",
+     "c": "site:threads.com/@username \"keyword\""
+    },
+    {
+     "t": "Check the linked Instagram account. Threads accounts are tied to Instagram, so the profile there — and its location tags, see 08 — is part of the same evidence set."
+    },
+    {
+     "t": "Archive posts on sight. Threads posts are deleted as readily as any other."
+    }
+   ],
+   "images": [
+    {
+     "f": "09-threads-recent.webp",
+     "c": "AFP workshop slide (p. 15): Threads keyword results and the limits of account-level search.",
+     "data": ""
+    },
+    {
+     "f": "09-threads-google.webp",
+     "c": "AFP workshop slide (p. 15): topic-based discovery on Threads, with precision caveats.",
+     "data": ""
+    }
+   ],
+   "notes": [
+    "Threads uses both threads.net and threads.com. Run your Google query against both — the indexes are not identical.",
+    "Because every Threads account has an Instagram account behind it, verifying the person is usually done on Instagram, not Threads."
+   ],
+   "links": [
+    [
+     "Threads",
+     "https://www.threads.com"
+    ]
+   ],
+   "tags": "threads search recent filter site: google instagram",
+   "family": "global",
+   "short": "Search"
+  },
+  {
+   "id": "telegram-search",
+   "num": "10",
+   "platform": "Telegram",
+   "title": "Search tools on Telegram — xtea.io and the alternatives",
+   "purpose": "Telegram has no public search across channels. Third-party indexes fill part of the gap, letting you find channels and groups by keyword before you join anything.",
+   "yes": [
+    "Public channels and groups discussing a topic",
+    "Channel size, creation date and posting patterns",
+    "A starting point for monitoring a coordinated network"
+   ],
+   "no": [
+    "Private groups, invite-only channels, or any direct message",
+    "Complete indexes — every one of these covers a slice, and they overlap badly",
+    "Confirmation that a channel is what its name claims"
+   ],
+   "steps": [
+    {
+     "t": "Start at xtea.io/ts_en.html and search the keyword. It indexes public channels, groups and bots and is the cleanest of the free options.",
+     "c": "https://xtea.io/ts_en.html"
+    },
+    {
+     "t": "Run the same query against a second and third index — coverage differs enough that this is not optional.",
+     "c": "tgstat.com/en/search · lyzem.com · telemetr.me"
+    },
+    {
+     "t": "Use Google against t.me as a fourth pass. Public channel posts are frequently indexed even when the search tools miss them.",
+     "c": "site:t.me \"keyword\""
+    },
+    {
+     "t": "Before joining, note the channel ID, member count and stated creation date from the index page. Screenshot it — these numbers move."
+    },
+    {
+     "t": "Join from a research account, never your own number. Use the Desktop app once you're in, so you have real search — that's section 11."
+    },
+    {
+     "t": "Scroll to the channel's first message to date it. A channel claiming years of history but starting three weeks ago is your story."
+    },
+    {
+     "t": "Archive channel pages via t.me/s/channelname, the public web preview, which the Wayback Machine can capture.",
+     "c": "https://t.me/s/channelname"
+    }
+   ],
+   "ops": [
+    [
+     "xtea.io/ts_en.html",
+     "Channel, group and bot search"
+    ],
+    [
+     "tgstat.com/en/search",
+     "Channel search with statistics and growth charts"
+    ],
+    [
+     "lyzem.com",
+     "Message-level search across public channels"
+    ],
+    [
+     "site:t.me \"keyword\"",
+     "Google fallback"
+    ],
+    [
+     "t.me/s/channelname",
+     "Web preview of a public channel — archivable"
+    ]
+   ],
+   "images": [
+    {
+     "f": "10-xtea-search.webp",
+     "c": "AFP workshop slide (p. 16): xtea.io as a discovery route for public Telegram channels.",
+     "data": ""
+    },
+    {
+     "f": "10-telegram-web-preview.webp",
+     "c": "AFP workshop slide (p. 17): Telegram Desktop search across public channels.",
+     "data": ""
+    }
+   ],
+   "notes": [
+    "These indexes are full of spam and scam channels, and several serve aggressive ads. Use a browser profile you don't care about.",
+    "Joining a channel can be visible to admins in small groups. Assume your research account is observable.",
+    "Never use phone-number lookup tools against a private individual without a clear editorial justification and an editor's sign-off."
+   ],
+   "links": [
+    [
+     "xtea.io Telegram search",
+     "https://xtea.io/ts_en.html"
+    ],
+    [
+     "TGStat",
+     "https://tgstat.com/en/search"
+    ]
+   ],
+   "tags": "telegram xtea tgstat lyzem channel search t.me index",
+   "family": "msg",
+   "short": "Channel indexes"
+  },
+  {
+   "id": "telegram-desktop",
+   "num": "11",
+   "platform": "Telegram Desktop",
+   "title": "Telegram Desktop search, and pulling metadata from images and video",
+   "purpose": "Once you're inside a channel, the Desktop app is a far better research tool than mobile — it has typed filters, jump-to-date, and it can save originals rather than compressed copies.",
+   "yes": [
+    "Every message matching a keyword across all your chats, filtered by type",
+    "What a channel posted on one specific date",
+    "Original files, with metadata intact, when the sender uploaded them as documents"
+   ],
+   "no": [
+    "Metadata from anything sent as a photo — Telegram strips and re-encodes it",
+    "Edit history of a message; you only see the current version",
+    "Deleted messages, which vanish for everyone"
+   ],
+   "steps": [
+    {
+     "t": "Use the global search bar at the top left, then apply the type filters that appear: Chats, Channels, Media, Links, Files, Music, Voice. Filtering to Links is the fastest way to map what a channel amplifies."
+    },
+    {
+     "t": "To search inside one channel, open it and use the magnifier in the header. In groups you can additionally filter <b>From<\/b> a specific sender."
+    },
+    {
+     "t": "Use the calendar icon to <b>jump to a date<\/b> — this is the closest thing to date-bounded search, and it's exact. Pick the day of the incident and read forward."
+    },
+    {
+     "t": "To keep the original file: if the sender posted it as a <b>file/document<\/b>, right-click → Save As gives you the untouched original, metadata included. If it was sent as a photo or video, Telegram already compressed it and the metadata is gone."
+    },
+    {
+     "t": "Run the saved file through a metadata reader — see section 16 — and check whether anything survived: capture time, device, GPS, editing software."
+    },
+    {
+     "t": "Note the message's own metadata even when the file has none: the posting timestamp, the forwarded-from attribution, the view count, and the message ID in its t.me link.",
+     "c": "https://t.me/channelname/12345"
+    },
+    {
+     "t": "Follow the forward chain backwards. Each forwarded message names its source channel — keep clicking back until you reach a channel that posted it natively."
+    }
+   ],
+   "ops": [
+    [
+     "Ctrl/Cmd + F",
+     "Search within the open chat"
+    ],
+    [
+     "Calendar icon",
+     "Jump to a specific date in a channel"
+    ],
+    [
+     "From: filter",
+     "Restrict group search to one sender"
+    ],
+    [
+     "t.me/channel/12345",
+     "Direct link to one message, by ID"
+    ]
+   ],
+   "images": [
+    {
+     "f": "11-telegram-filters.webp",
+     "c": "AFP workshop slide (p. 17): search and translation features in Telegram Desktop.",
+     "data": ""
+    },
+    {
+     "f": "11-telegram-jump-date.webp",
+     "c": "AFP workshop slide (p. 18): exporting channel material from Telegram Desktop.",
+     "data": ""
+    }
+   ],
+   "notes": [
+    "A file sent as a document keeps its metadata; the same file sent as a photo does not. Always check whether both versions were posted.",
+    "The forwarded-from label can be removed by the sender's privacy settings, so an absent chain doesn't mean it's original.",
+    "Don't upload source-identifying material to a web metadata service. Install ExifTool and run it locally for anything sensitive."
+   ],
+   "tags": "telegram desktop search filters jump to date metadata exif forwarded document",
+   "family": "msg",
+   "short": "Desktop + metadata"
+  },
+  {
+   "id": "tiktok",
+   "num": "12",
+   "platform": "TikTok",
+   "title": "Search and analysis tools for TikTok, including the Bellingcat timestamp tool",
+   "purpose": "TikTok's search is weak and undated, but the video ID itself contains the exact upload time. That single trick resolves a large share of TikTok verification questions.",
+   "yes": [
+    "The exact upload time of any video, to the second, in UTC",
+    "Whether a 'new' clip is actually years old",
+    "Which accounts pushed a hashtag and when"
+   ],
+   "no": [
+    "Where the video was filmed — TikTok publishes no location data",
+    "Original camera metadata, which is stripped on upload",
+    "Reliable native date filtering beyond crude ranges"
+   ],
+   "steps": [
+    {
+     "t": "Search on the web at tiktok.com/search?q= and use the filter panel: <b>Date posted<\/b> (yesterday, this week, this month, last 3/6 months) and <b>Sort by<\/b> (relevance or like count). These are coarse but they're what exists."
+    },
+    {
+     "t": "Copy the video URL. The long number is the video ID and it encodes the upload timestamp.",
+     "c": "https://www.tiktok.com/@username/video/7123456789012345678"
+    },
+    {
+     "t": "Paste the URL into the <b>Bellingcat TikTok timestamp tool<\/b> and read the exact upload time. It runs entirely in your browser and works even for videos that have since been deleted, as long as you have the URL.",
+     "c": "https://bellingcat.github.io/tiktok-timestamp/"
+    },
+    {
+     "t": "Convert the result to local time. The tool returns UTC; Singapore is UTC+8, so 14:20 UTC is 22:20 SGT the same day."
+    },
+    {
+     "t": "Compare that timestamp against the event it claims to show. A video uploaded before the incident is the fastest debunk available on this platform."
+    },
+    {
+     "t": "Map the spread: search the hashtag, note the earliest uploads, and check whether several accounts posted the same clip within minutes of each other — that pattern is coordination, not virality."
+    },
+    {
+     "t": "For structured collection across a hashtag, use Bellingcat's tiktok-hashtag-analysis to archive posts and metadata in bulk.",
+     "c": "https://github.com/bellingcat/tiktok-hashtag-analysis"
+    },
+    {
+     "t": "Take keyframes from the video and reverse-image-search them (13, 14) — most 'TikTok footage' turns out to be re-uploaded from somewhere else."
+    }
+   ],
+   "ops": [
+    [
+     "tiktok.com/search?q=keyword",
+     "Base search, with the filter panel"
+    ],
+    [
+     "bellingcat.github.io/tiktok-timestamp",
+     "Exact upload time from the video ID"
+    ],
+    [
+     "site:tiktok.com \"phrase\"",
+     "Google fallback for older content"
+    ],
+    [
+     "tiktok.com/@user/video/ID",
+     "Canonical video URL — keep the ID"
+    ]
+   ],
+   "images": [
+    {
+     "f": "12-tiktok-filters.webp",
+     "c": "AFP workshop slide (p. 19): TikTok search clues such as date, caption, tags and sound.",
+     "data": ""
+    },
+    {
+     "f": "12-bellingcat-timestamp.webp",
+     "c": "AFP workshop slide (p. 19): decoding a TikTok upload time with a timestamp tool.",
+     "data": ""
+    }
+   ],
+   "notes": [
+    "The timestamp tool is client-side maths on the video ID, not a lookup — it can't be spoofed by the uploader and it works on deleted videos.",
+    "Upload time is not filming time. It proves the video existed by then, nothing more.",
+    "Download videos with a tool that preserves the file rather than screen-recording, so keyframe searching stays usable."
+   ],
+   "links": [
+    [
+     "Bellingcat timestamp tool",
+     "https://bellingcat.github.io/tiktok-timestamp/"
+    ],
+    [
+     "Bellingcat toolkit — TikTok",
+     "https://bellingcat.gitbook.io/toolkit/categories/social-media/tiktok"
+    ]
+   ],
+   "tags": "tiktok bellingcat timestamp video id hashtag analysis search filters",
+   "family": "global",
+   "short": "Timestamp tool"
+  },
+  {
+   "id": "reverse-image",
+   "num": "13",
+   "platform": "Cross-platform",
+   "title": "Reverse image search — Google Lens, TinEye, Yandex, Baidu",
+   "purpose": "The single highest-yield check in the handbook. Most viral 'breaking' images are old images. Four engines, because each indexes a different part of the web and they disagree constantly.",
+   "yes": [
+    "Earlier appearances of the same image",
+    "The original context a photo has been stripped of",
+    "Whether a face or a building appears elsewhere online"
+   ],
+   "no": [
+    "A guaranteed original — you find the earliest indexed copy, not the first one taken",
+    "Anything for a genuinely new image, where no result is the expected result",
+    "Matches for heavily edited or AI-generated variants"
+   ],
+   "steps": [
+    {
+     "t": "<b>Crop first.<\/b> Search the most distinctive element — a shopfront sign, a uniform patch, a skyline — not the whole frame. Whole-frame searches return visually similar noise; a cropped detail returns the source."
+    },
+    {
+     "t": "<b>Google Lens<\/b> (lens.google.com or the camera icon in Google Images): best general coverage, and its 'Find image source' view lists pages carrying the image. Then open <b>About this image<\/b> for Google's earliest-seen date and any Content Credentials.",
+     "c": "https://lens.google.com"
+    },
+    {
+     "t": "<b>TinEye<\/b>: exact-match specialist. Its decisive feature is sorting results by <b>Oldest<\/b> — that's your best available answer to 'when did this first appear online'.",
+     "c": "https://tineye.com"
+    },
+    {
+     "t": "<b>Yandex<\/b>: consistently the strongest for faces, buildings and landscapes, and for anything Russian or Eastern European. Often finds matches the others miss entirely.",
+     "c": "https://yandex.com/images/"
+    },
+    {
+     "t": "<b>Baidu 识图<\/b>: the one that indexes the Chinese web — Weibo, Douyin, Zhihu, forums. Essential for anything with a Chinese-language origin claim.",
+     "c": "https://graph.baidu.com"
+    },
+    {
+     "t": "If all four come back empty, change the image: flip it horizontally, crop differently, adjust contrast, or re-upload a screenshot of it. Re-run the promising engines."
+    },
+    {
+     "t": "For video, pull keyframes first — the InVID plugin does this in one click (14) — and search each keyframe separately."
+    },
+    {
+     "t": "Record what you searched and what came back. 'Four engines, no earlier match found' is a legitimate line in a verification note."
+    }
+   ],
+   "ops": [
+    [
+     "lens.google.com",
+     "Broadest index, plus About this image"
+    ],
+    [
+     "tineye.com",
+     "Exact matches, sortable by oldest"
+    ],
+    [
+     "yandex.com/images",
+     "Faces, places, Eastern Europe"
+    ],
+    [
+     "graph.baidu.com",
+     "Chinese-language web"
+    ]
+   ],
+   "images": [
+    {
+     "f": "13-lens-about-this-image.webp",
+     "c": "AFP workshop slide (p. 22): reverse-image engines to run in parallel.",
+     "data": ""
+    },
+    {
+     "f": "13-tineye-oldest.webp",
+     "c": "AFP workshop slide (p. 22): Yandex as a strong option for faces and visual similarity.",
+     "data": ""
+    }
+   ],
+   "notes": [
+    "Different engines, different answers, by design. Run all four before drawing a conclusion; treat any single engine's silence as meaningless.",
+    "An earliest-indexed date is not a capture date. It's an upper bound: the photo existed by then.",
+    "Uploading an image sends it to that company. For unpublished material from a source, crop out identifying detail or don't upload it at all."
+   ],
+   "links": [
+    [
+     "Google Lens",
+     "https://lens.google.com"
+    ],
+    [
+     "TinEye",
+     "https://tineye.com"
+    ],
+    [
+     "Yandex Images",
+     "https://yandex.com/images/"
+    ],
+    [
+     "Baidu 识图",
+     "https://graph.baidu.com"
+    ]
+   ],
+   "tags": "reverse image search google lens tineye yandex baidu shitu crop oldest",
+   "family": "forensic",
+   "short": "Four engines"
+  },
+  {
+   "id": "invid",
+   "num": "14",
+   "platform": "Browser extension",
+   "title": "The InVID-WeVerify plugin — verifying video and images from social media",
+   "purpose": "One extension that bundles most of this handbook into a right-click menu: keyframes, reverse search, metadata, magnifier, forensics, OCR and experimental AI detection. If a colleague installs one tool, this is it.",
+   "yes": [
+    "Keyframes from a video, each reverse-searchable in one click",
+    "Thumbnails and metadata from YouTube and Facebook video",
+    "A fast forensic first pass on a suspect image"
+   ],
+   "no": [
+    "A verdict. Every module produces indicators, not conclusions",
+    "Reliable deepfake detection — that tab is explicitly experimental",
+    "Privacy. Several modules upload your file to research servers"
+   ],
+   "steps": [
+    {
+     "t": "Install <b>Fake news debunker by InVID, WeVerify & VeraAI<\/b> from the Chrome Web Store — also on Edge, Opera and Firefox. Current version is 0.93 (July 2026)."
+    },
+    {
+     "t": "Open the plugin's toolbar and start with <b>Keyframes<\/b>: paste a video URL, and it segments the video and extracts representative frames."
+    },
+    {
+     "t": "Click the magnifier under any keyframe to reverse-search it across Google, Yandex, Bing and TinEye at once. This is the core workflow and it resolves most 'is this video old' questions."
+    },
+    {
+     "t": "Use <b>Metadata<\/b> for images and video files, <b>Magnifier<\/b> to zoom into signage and insignia, and <b>OCR<\/b> to pull text out of a frame so you can search it."
+    },
+    {
+     "t": "Use <b>Image forensic<\/b> for error-level and noise analysis. Read the output as 'this region was processed differently', not 'this was faked' — compression artefacts look identical to edits at a glance."
+    },
+    {
+     "t": "Use <b>Analysis<\/b> on an X or Facebook post URL for posting time, engagement pattern and the account's history."
+    },
+    {
+     "t": "The <b>Deepfake<\/b> and <b>Voice-clone<\/b> (Hiya-powered) tabs give probability scores. Log the number, then verify by other means — see 17 for how to read these."
+    },
+    {
+     "t": "Use the <b>Archive<\/b> module to save a WACZ capture of the page you're analysing before you leave it."
+    }
+   ],
+   "ops": [
+    [
+     "Right-click any image or video",
+     "Opens the InVID submenu in context"
+    ],
+    [
+     "Keyframes → magnifier icon",
+     "Reverse search that frame in four engines"
+    ],
+    [
+     "OCR",
+     "Extract on-screen text for searching"
+    ],
+    [
+     "Analysis",
+     "Post-level metadata for X and Facebook"
+    ]
+   ],
+   "images": [
+    {
+     "f": "14-invid-toolbar.webp",
+     "c": "AFP workshop slide (p. 25): the InVID verification plugin as a browser-based toolbox.",
+     "data": ""
+    },
+    {
+     "f": "14-invid-keyframes.webp",
+     "c": "AFP workshop slide (p. 32): extracting file metadata through InVID or Metadata2Go.",
+     "data": ""
+    }
+   ],
+   "notes": [
+    "Some advanced modules (Twitter SNA, CheckGIF, forensic GIF export) need a free registration reserved for journalists and researchers. Apply from inside the plugin.",
+    "Frames sent to the deepfake tab are processed on CERTH servers and retained for around 30 days. Never send unpublished source material through it.",
+    "Some X/Twitter modules have been unreliable since the API changes. If a tab returns nothing, that's the API, not your file."
+   ],
+   "links": [
+    [
+     "Chrome Web Store",
+     "https://chromewebstore.google.com/detail/fake-news-debunker-invid/mhccpoafgdgbhnjfhkcmgknndkeenfhe"
+    ],
+    [
+     "Bellingcat guide",
+     "https://bellingcat.gitbook.io/toolkit/more/all-tools/invid"
+    ]
+   ],
+   "tags": "invid weverify veraai plugin keyframes forensic ocr magnifier deepfake archive",
+   "family": "forensic",
+   "short": "InVID plugin"
+  },
+  {
+   "id": "mapping",
+   "num": "15",
+   "platform": "Mapping",
+   "title": "Mapping tools for location work — Google Earth, Street View, Yandex, AMAP, Baidu Maps",
+   "purpose": "Geolocation is matching what's in the frame to what's on the map. Chronolocation is working out when it was filmed from shadows and imagery dates. Both need more than one map provider.",
+   "yes": [
+    "Confirming or ruling out a claimed filming location",
+    "Roughly when a photo was taken, from shadow direction and length",
+    "What a place looked like before an incident, via historical imagery"
+   ],
+   "no": [
+    "Coverage everywhere — street-level imagery is patchy and often years old",
+    "Consistent coordinates across providers, see the note below",
+    "A shortcut. This is slow, manual work"
+   ],
+   "steps": [
+    {
+     "t": "Inventory the frame first, before opening any map: signage and language, road markings, vehicle plates, power pylons, roof shapes, vegetation, terrain line, antennas. You're looking for a combination that can only exist in one place."
+    },
+    {
+     "t": "Search the text you found. A shop name plus a city in Google or Baidu will often land the location before you touch satellite imagery."
+    },
+    {
+     "t": "<b>Google Earth Pro<\/b> (desktop, free) for the satellite work: the <b>historical imagery<\/b> slider shows the same spot across years, which dates construction and damage. Use the measuring tool to check building dimensions against the frame."
+    },
+    {
+     "t": "<b>Google Street View<\/b> to confirm at eye level, and use its time slider to see earlier captures — vital when a shopfront has changed since the photo."
+    },
+    {
+     "t": "<b>Yandex Maps<\/b> for Russia, Central Asia and the Caucasus, where its panoramas and satellite imagery beat Google's."
+    },
+    {
+     "t": "<b>AMAP 高德地图<\/b> and <b>Baidu Maps 百度地图<\/b> for mainland China: better POI data, current business names, and street-level 街景 coverage where Google has none. Cross-check between the two — their imagery dates differ."
+    },
+    {
+     "t": "For chronolocation, take the shadow direction and length to SunCalc and test candidate dates and times against the sun position for your located coordinates.",
+     "c": "https://www.suncalc.org"
+    },
+    {
+     "t": "Write the confirmation up as a list of matched features with a screenshot for each — the pylon, the kerb, the sign, the roofline. One matching feature is a coincidence; five is a geolocation."
+    }
+   ],
+   "ops": [
+    [
+     "Google Earth Pro",
+     "Historical imagery slider, measurement, 3D terrain"
+    ],
+    [
+     "Google Maps Street View",
+     "Eye-level confirmation with a time slider"
+    ],
+    [
+     "Yandex Maps",
+     "Panoramas, strongest in Russia and Central Asia"
+    ],
+    [
+     "高德地图 AMAP",
+     "Mainland China POI and street view"
+    ],
+    [
+     "百度地图 Baidu Maps",
+     "Mainland China panoramas — cross-check against AMAP"
+    ],
+    [
+     "suncalc.org",
+     "Sun position by date, time and coordinates"
+    ]
+   ],
+   "images": [
+    {
+     "f": "15-google-earth-historical.webp",
+     "c": "AFP workshop example (p. 7): start location work from a platform map, then corroborate it.",
+     "data": ""
+    },
+    {
+     "f": "15-amap-streetview.webp",
+     "c": "AFP workshop example (p. 13): nearby-place results are leads, not proof of location.",
+     "data": ""
+    }
+   ],
+   "notes": [
+    "<b>Coordinate systems differ.<\/b> Chinese map providers use offset systems — GCJ-02 for AMAP, BD-09 for Baidu — while Google Earth, GPS and EXIF use WGS-84. The same point can appear several hundred metres apart between providers. Convert before comparing, and never quote a Chinese-map coordinate as a GPS coordinate.",
+    "Satellite imagery dates are shown in Google Earth Pro's status bar. Always record which capture date you used.",
+    "Street-level imagery can be years old. A missing building proves nothing until you check the capture date."
+   ],
+   "links": [
+    [
+     "Google Earth",
+     "https://earth.google.com"
+    ],
+    [
+     "Yandex Maps",
+     "https://yandex.com/maps"
+    ],
+    [
+     "SunCalc",
+     "https://www.suncalc.org"
+    ]
+   ],
+   "tags": "geolocation chronolocation google earth street view yandex amap 高德 baidu maps suncalc gcj-02",
+   "family": "forensic",
+   "short": "Geolocation"
+  },
+  {
+   "id": "metadata",
+   "num": "16",
+   "platform": "Files",
+   "title": "Extracting metadata with Metadata2Go",
+   "purpose": "When you have an original file rather than a social media copy, its embedded metadata can give you capture time, camera, editing software and sometimes GPS coordinates.",
+   "yes": [
+    "Capture timestamp and camera or phone model, if present",
+    "GPS coordinates, on files straight off a phone with location on",
+    "Traces of editing software in the processing history"
+   ],
+   "no": [
+    "Anything from a file downloaded off social media — it's all been stripped",
+    "Proof of authenticity; metadata is trivial to forge",
+    "A conclusion from absence — stripped metadata is the normal case, not a red flag"
+   ],
+   "steps": [
+    {
+     "t": "Get the most original file you can. Ask the source for the file straight from the phone, sent as a document or by email — not through WhatsApp, WeChat or any social platform, all of which re-encode and strip."
+    },
+    {
+     "t": "Upload it to metadata2go.com. It handles images, video, audio, PDFs and documents.",
+     "c": "https://www.metadata2go.com"
+    },
+    {
+     "t": "Read the EXIF block first: DateTimeOriginal, Make, Model, LensModel. Compare DateTimeOriginal against the story's claimed timeline."
+    },
+    {
+     "t": "Check for a GPS block. If coordinates are present, plot them — and remember they're WGS-84, so they will not line up with Chinese map providers without conversion (see 15)."
+    },
+    {
+     "t": "Check Software and ProcessingSoftware. 'Adobe Photoshop' in a photo presented as an untouched phone snap is a question to put to the source, not a verdict."
+    },
+    {
+     "t": "Compare against a control: ask the source for another photo from the same phone, same day. Metadata that's consistent across both is far more persuasive than a single file."
+    },
+    {
+     "t": "For anything sensitive, install <b>ExifTool<\/b> and run it locally instead. Uploading a source's unpublished file to a third-party website is a security decision, and usually the wrong one.",
+     "c": "exiftool -a -G1 -s photo.jpg"
+    }
+   ],
+   "ops": [
+    [
+     "metadata2go.com",
+     "Browser-based reader for images, video, audio, PDF"
+    ],
+    [
+     "exiftool -a -G1 -s file.jpg",
+     "Local extraction, full tag list with groups"
+    ],
+    [
+     "exiftool -gps:all file.jpg",
+     "GPS block only"
+    ]
+   ],
+   "images": [
+    {
+     "f": "16-metadata2go-exif.webp",
+     "c": "AFP workshop slide (p. 30): what metadata may reveal about a file and its capture device.",
+     "data": ""
+    },
+    {
+     "f": "16-metadata2go-gps.webp",
+     "c": "AFP workshop slide (p. 32): metadata fields to check, including GPS date, latitude and longitude.",
+     "data": ""
+    }
+   ],
+   "notes": [
+    "Facebook, Instagram, X, WhatsApp, WeChat, Weibo and Telegram (photo mode) all strip EXIF on upload. If you're reading metadata from a social download, you're reading the platform's, not the camera's.",
+    "Every field can be edited with the same tools that read it. Metadata supports a timeline, it never establishes one on its own.",
+    "Screenshots have their own metadata — of the screenshotting device, not the original photo. Don't confuse the two."
+   ],
+   "links": [
+    [
+     "Metadata2Go",
+     "https://www.metadata2go.com"
+    ],
+    [
+     "ExifTool",
+     "https://exiftool.org"
+    ]
+   ],
+   "tags": "metadata exif metadata2go exiftool gps datetimeoriginal stripped",
+   "family": "forensic",
+   "short": "Metadata2Go"
+  },
+  {
+   "id": "ai-detection",
+   "num": "17",
+   "platform": "AI & provenance",
+   "title": "AI detection — Hive, SynthID, C2PA, Deepfake-o-meter, Hiya",
+   "purpose": "Two different questions get confused here. Provenance tools read a signature that a real generator left behind. Detectors guess statistically. Provenance evidence is strong when present; detector scores are triage only.",
+   "yes": [
+    "A definite yes when a watermark or credential is found and validates",
+    "A probability score to prioritise which clips to investigate properly",
+    "An audit trail — who signed a file, with what tool, and when"
+   ],
+   "no": [
+    "A verdict on 'is this AI'. No tool here delivers one",
+    "Anything from absence — a screenshot destroys every signature listed below",
+    "Reliable results on compressed, re-encoded social media video"
+   ],
+   "steps": [
+    {
+     "t": "<b>Start with provenance, not detection.<\/b> Check <b>C2PA Content Credentials<\/b> at contentcredentials.org/verify — drag the file in and it reads the signed manifest: creating tool, signer, edit history, AI involvement. Verification runs in your browser.",
+     "c": "https://contentcredentials.org/verify"
+    },
+    {
+     "t": "Then check for a <b>SynthID<\/b> watermark, which Google embeds in output from Gemini, Imagen, Veo and Lyria, and which OpenAI, ElevenLabs and NVIDIA have adopted. The SynthID Detector portal is waitlisted for journalists and researchers; the Gemini app can also check an image for the watermark.",
+     "c": "https://deepmind.google/synthid"
+    },
+    {
+     "t": "For images with no credentials, run the <b>Hive AI Detector<\/b> Chrome extension: right-click an image on any page and it returns a likelihood that it's AI-generated, with a breakdown by generator family."
+    },
+    {
+     "t": "For video and audio, use <b>Deepfake-o-meter<\/b> from the University at Buffalo. Free account, and it runs several independent open-source detectors on the same file — the disagreement between models is the useful signal, not the average.",
+     "c": "https://zinc.cse.buffalo.edu/ubmdfl/deep-o-meter/landing_page"
+    },
+    {
+     "t": "For voice specifically, use the <b>Hiya Deepfake Voice Detector<\/b> Chrome extension, which scores audio playing in a tab from about a second of speech. The same engine is built into the InVID plugin (14)."
+    },
+    {
+     "t": "Record every score with the tool name, version and date. These models change, and a number without its source is worthless three months later."
+    },
+    {
+     "t": "<b>Then verify by other means.<\/b> Reverse-search keyframes (13), check the upload timestamp (12), geolocate the background (15), and contact the person who posted it. A detector score never goes to air on its own."
+    }
+   ],
+   "ops": [
+    [
+     "contentcredentials.org/verify",
+     "C2PA manifest — signer, tool, edit history"
+    ],
+    [
+     "c2paviewer.com",
+     "Alternative C2PA reader, also client-side"
+    ],
+    [
+     "deepmind.google/synthid",
+     "SynthID watermark detection (waitlisted)"
+    ],
+    [
+     "Hive AI Detector (Chrome)",
+     "Right-click image → AI likelihood"
+    ],
+    [
+     "Deepfake-o-meter (UB)",
+     "Multiple open detectors for image, video, audio"
+    ],
+    [
+     "Hiya Deepfake Voice Detector (Chrome)",
+     "Voice-clone score from live audio"
+    ]
+   ],
+   "images": [
+    {
+     "f": "17-c2pa-verify.webp",
+     "c": "AFP workshop slide (p. 35): C2PA content credentials for provenance and edit history.",
+     "data": ""
+    },
+    {
+     "f": "17-deepfake-o-meter.webp",
+     "c": "AFP workshop slide (p. 37): Deepfake-o-meter as one probabilistic detector among several.",
+     "data": ""
+    }
+   ],
+   "notes": [
+    "<b>Absence proves nothing.<\/b> Screenshotting, re-uploading, cropping and messaging apps all strip C2PA credentials, and SynthID only covers participating generators. 'No watermark found' is not 'not AI'.",
+    "Detector accuracy falls sharply on the compressed, re-encoded video that social platforms actually serve. Test the tools on known-real footage from the same platform so you know their baseline.",
+    "Never publish a percentage as a finding. Report what you did, what each tool returned, and what independent evidence you obtained.",
+    "SynthID has been shown to be reverse-engineerable, so a present watermark is strong evidence and an absent one is no evidence at all."
+   ],
+   "links": [
+    [
+     "Verify Content Credentials",
+     "https://contentcredentials.org/verify"
+    ],
+    [
+     "SynthID",
+     "https://deepmind.google/synthid"
+    ],
+    [
+     "Deepfake-o-meter",
+     "https://zinc.cse.buffalo.edu/ubmdfl/deep-o-meter/landing_page"
+    ]
+   ],
+   "tags": "ai detection hive synthid c2pa content credentials deepfake-o-meter hiya voice watermark provenance",
+   "family": "forensic",
+   "short": "AI + provenance"
+  }
+ ],
+ "routes": [
+  {
+   "label": "A photo",
+   "ids": [
+    "reverse-image",
+    "metadata",
+    "ai-detection",
+    "invid"
+   ],
+   "why": [
+    "Find earlier copies first — most 'new' photos are old",
+    "Read whatever metadata survived",
+    "Check for credentials and watermarks",
+    "Magnifier, OCR and forensic pass"
+   ]
+  },
+  {
+   "label": "A video",
+   "ids": [
+    "invid",
+    "reverse-image",
+    "tiktok",
+    "telegram-desktop",
+    "ai-detection"
+   ],
+   "why": [
+    "Pull keyframes and reverse-search each one",
+    "Chase each frame across four engines",
+    "If it's TikTok, get the exact upload time",
+    "If it came via Telegram, get the original file",
+    "Provenance and detector triage last"
+   ]
+  },
+  {
+   "label": "An account",
+   "ids": [
+    "x-operators",
+    "x-lists",
+    "facebook",
+    "threads",
+    "telegram-search"
+   ],
+   "why": [
+    "Everything they posted, bounded by date",
+    "Put them on a private list and watch",
+    "Public posts and Page history",
+    "Check the linked Instagram identity",
+    "Map the channels they appear in"
+   ]
+  },
+  {
+   "label": "A claim or quote",
+   "ids": [
+    "google-operators",
+    "x-operators",
+    "baidu",
+    "weibo",
+    "wechat"
+   ],
+   "why": [
+    "Does this wording exist anywhere at all",
+    "Who said it first on X",
+    "The Chinese-language web Google misses",
+    "Mainland origin, bounded by hour and province",
+    "Closed platforms, checked by hand"
+   ]
+  },
+  {
+   "label": "A place",
+   "ids": [
+    "mapping",
+    "instagram",
+    "weibo",
+    "reverse-image"
+   ],
+   "why": [
+    "Match the frame to the map, then date it",
+    "Public posts tagged to that location",
+    "附近 for geotagged posts on the ground",
+    "Confirm the scene appeared elsewhere before"
+   ]
+  },
+  {
+   "label": "A file or audio clip",
+   "ids": [
+    "metadata",
+    "ai-detection",
+    "telegram-desktop"
+   ],
+   "why": [
+    "Read the embedded metadata locally",
+    "Voice-clone and provenance checks",
+    "Get the uncompressed original if it came via Telegram"
+   ]
+  }
+ ]
+}</script>
+<script>
+/* ============ state ============ */
+const DATA = JSON.parse(document.getElementById("data").textContent);
+DATA.meta.h1 = DATA.meta.h1 || "Start from what you have, not from the tool.";
+DATA.meta.lede = DATA.meta.lede || "Seventeen tools, each with the same three questions answered up front: what it proves, what it can't, and the exact clicks to get there. <mark>Pick what's in front of you</mark> and the desk will tell you which sections to open, in order.";
+DATA.rules = DATA.rules || [
+ "<strong>Archive first.</strong> Save the URL to <a href='https://archive.today'>archive.today</a> and the Wayback Machine before you interact with it. Posts get deleted the moment they're questioned.",
+ "<strong>Screenshot the whole window,</strong> URL bar and system clock included, not just the content. Add the timestamp in your own timezone (SGT = UTC+8) to your notes.",
+ "<strong>Don't tip off the account.</strong> Don't follow, like, or view stories from your work profile. Use a research profile for logged-in searching.",
+ "<strong>Keep a log</strong> as you go: what you searched, when, what came back, what you ruled out. A negative result is a finding — write it down.",
+ "<strong>No single tool is proof.</strong> Every result here is a lead that needs a second, independent confirmation before it goes on air."
+];
+const FAM = {open:"Open web", global:"Global platforms", china:"Chinese platforms", msg:"Messaging", forensic:"Media forensics & location"};
+const FAMORDER = ["global","china","open","msg","forensic"];
+let dirty = false, dirHandle = null, editing = false;
+
+/* ============ helpers ============ */
+const esc = s => String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
+const attr = s => esc(s).replace(/"/g,"&quot;");
+const byId = () => Object.fromEntries(DATA.sections.map(s=>[s.id,s]));
+function get(path){ return path.split(".").reduce((o,k)=>o==null?o:o[k], DATA); }
+function set(path,val){
+  const ks = path.split("."); const last = ks.pop();
+  const o = ks.reduce((a,k)=>a[k], DATA); o[last] = val;
+}
+function mark(state){
+  const el = document.getElementById("status");
+  if(state === "dirty"){ dirty = true; el.textContent = "unsaved changes"; el.className = "status dirty"; }
+  else if(state === "saved"){ dirty = false; el.textContent = "saved"; el.className = "status ok"; setTimeout(()=>{ if(!dirty){ el.textContent = editing?"editing":"viewing"; el.className="status"; } },2500); }
+  else { el.textContent = editing?"editing":"viewing"; el.className = "status"; }
+}
+function ed(field,path,ph){ return ' data-b="'+attr(path)+'" data-ph="'+attr(ph||"")+'"'; }
+function delBtn(list,i,cls){ return '<button class="mini del ed '+(cls||"")+'" data-act="del" data-list="'+attr(list)+'" data-i="'+i+'" type="button" title="Remove">×</button>'; }
+function imgSrc(im){ return im.data ? im.data : "images/" + im.f; }
+
+/* ============ render ============ */
+function railHTML(){
+  return FAMORDER.map(f=>{
+    const items = DATA.sections.filter(s=>s.family===f);
+    if(!items.length) return "";
+    return '<div data-fam="'+f+'"><div class="famhead">'+FAM[f]+'</div><ul class="railnav">'+
+      items.map(s=>'<li><a href="#'+s.id+'" data-for="'+s.id+'" class="'+(hasShot(s)?"has":"")+'"><span class="n">'+esc(s.num)+'</span><span>'+esc(s.short||s.title)+'<span class="dot"></span></span></a></li>').join("")+
+      '</ul></div>';
+  }).join("");
+}
+function hasShot(s){ return (s.images||[]).some(i=>i.data || i.loaded); }
+function sheetHTML(){
+  return DATA.sections.map(s=>'<a class="tile '+(hasShot(s)?"has":"")+'" data-fam="'+s.family+'" data-tile="'+s.id+'" href="#'+s.id+'">'+
+    '<span class="n">'+esc(s.num)+'</span><span class="p">'+esc(s.platform)+'</span><span class="s">'+esc(s.short||"")+'</span><span class="shot"></span></a>').join("");
+}
+function stepHTML(si,i,st){
+  const p = "sections."+si+".steps."+i;
+  return '<li class="row">'+delBtn("sections."+si+".steps",i,"rowdel")+
+    '<div class="txt"><p'+ed(1,p+".t","Step text")+'>'+(st.t||"")+'</p>'+
+    (st.c!==undefined ? '<p style="margin-top:8px"><button class="copy" type="button" data-copy="'+attr(st.c)+'"'+ed(1,p+".c","command")+' data-plain="1">'+esc(st.c)+'</button></p>' : "")+
+    '</div></li>';
+}
+function slotHTML(si,i,im){
+  const p = "sections."+si+".images."+i;
+  return '<figure class="slot empty" data-slot="'+si+"."+i+'">'+
+    '<span class="tag">'+esc(DATA.sections[si].num)+"."+(i+1)+'</span>'+
+    '<img alt="'+attr(im.c)+'" src="'+attr(imgSrc(im))+'">'+
+    '<div class="drop"><span class="hint">Screenshot slot</span><span class="path">images/'+esc(im.f)+'</span><span class="hint">drop an image here</span></div>'+
+    '<figcaption'+ed(1,p+".c","Caption")+'>'+(im.c||"")+'</figcaption>'+
+    '<div class="slotbar"><span class="fn">images/<span'+ed(1,p+".f","filename.png")+' data-plain="1">'+esc(im.f)+'</span></span>'+
+    '<button class="mini" data-act="clearimg" data-slot="'+si+"."+i+'" type="button">clear image</button>'+
+    delBtn("sections."+si+".images",i)+'</div></figure>';
+}
+function sectionHTML(s,si){
+  let h = '<section class="sec" id="'+s.id+'" data-fam="'+s.family+'" data-i="'+si+'" data-tags="'+attr((s.tags||"")+" "+s.title+" "+s.platform)+'">';
+  h += '<div class="sec-head"><span class="sec-num">'+esc(s.num)+'</span><span class="sec-plat"'+ed(1,"sections."+si+".platform","Platform")+' data-plain="1">'+esc(s.platform)+'</span>';
+  h += '<h3'+ed(1,"sections."+si+".title","Tool name")+'>'+(s.title||"")+'</h3>';
+  h += '<p class="purpose"'+ed(1,"sections."+si+".purpose","What this tool is for")+'>'+(s.purpose||"")+'</p></div><div class="sec-body">';
+
+  h += '<div class="verdict"><div class="vbox v-yes"><h4>What it can establish</h4><ul>'+
+    (s.yes||[]).map((x,i)=>'<li class="row"><span'+ed(1,"sections."+si+".yes."+i,"can establish")+'>'+x+'</span> '+delBtn("sections."+si+".yes",i)+'</li>').join("")+
+    '</ul><div class="addbar"><button class="mini" data-act="add" data-list="sections.'+si+'.yes" type="button">+ line</button></div></div>';
+  h += '<div class="vbox v-no"><h4>What it cannot</h4><ul>'+
+    (s.no||[]).map((x,i)=>'<li class="row"><span'+ed(1,"sections."+si+".no."+i,"cannot")+'>'+x+'</span> '+delBtn("sections."+si+".no",i)+'</li>').join("")+
+    '</ul><div class="addbar"><button class="mini" data-act="add" data-list="sections.'+si+'.no" type="button">+ line</button></div></div></div>';
+
+  h += '<div class="blockhead">Step by step</div><ol class="steps">'+(s.steps||[]).map((st,i)=>stepHTML(si,i,st)).join("")+'</ol>';
+  h += '<div class="addbar"><button class="mini" data-act="add" data-list="sections.'+si+'.steps" type="button">+ step</button>'+
+       '<button class="mini" data-act="addcode" data-list="sections.'+si+'.steps" type="button">+ step with command</button></div>';
+
+  if(s.ops && s.ops.length){
+    h += '<div class="blockhead">Reference — click to copy</div><table class="ops"><tbody>'+
+      s.ops.map((o,i)=>'<tr><td><button class="copy" type="button" data-copy="'+attr(o[0])+'"'+ed(1,"sections."+si+".ops."+i+".0","operator")+' data-plain="1">'+esc(o[0])+'</button></td>'+
+      '<td><span'+ed(1,"sections."+si+".ops."+i+".1","what it does")+'>'+o[1]+'</span> '+delBtn("sections."+si+".ops",i)+'</td></tr>').join("")+'</tbody></table>';
+  } else {
+    h += '<div class="blockhead ed">Reference</div>';
+  }
+  h += '<div class="addbar"><button class="mini" data-act="addop" data-list="sections.'+si+'.ops" type="button">+ reference row</button></div>';
+
+  h += '<div class="blockhead">Screenshots</div><div class="slots">'+(s.images||[]).map((im,i)=>slotHTML(si,i,im)).join("")+'</div>';
+  h += '<div class="addbar"><button class="mini" data-act="addimg" data-list="sections.'+si+'.images" type="button">+ screenshot slot</button></div>';
+
+  if(s.notes && s.notes.length){
+    h += '<div class="notes"><h4>Watch out for</h4><ul>'+
+      s.notes.map((x,i)=>'<li class="row"><span'+ed(1,"sections."+si+".notes."+i,"caveat")+'>'+x+'</span> '+delBtn("sections."+si+".notes",i)+'</li>').join("")+
+      '</ul><div class="addbar"><button class="mini" data-act="add" data-list="sections.'+si+'.notes" type="button">+ caveat</button></div></div>';
+  } else {
+    h += '<div class="addbar"><button class="mini" data-act="add" data-list="sections.'+si+'.notes" type="button">+ caveat</button></div>';
+  }
+
+  if(s.links && s.links.length){
+    h += '<div class="links">'+s.links.map(l=>'<a href="'+attr(l[1])+'" target="_blank" rel="noopener">'+esc(l[0])+'</a>').join("")+'</div>';
+  }
+  h += '<div class="secbar"><button class="mini del" data-act="delsection" data-i="'+si+'" type="button">delete this tool</button></div>';
+  return h + '</div></section>';
+}
+function rulesHTML(){
+  return DATA.rules.map((r,i)=>'<li class="row"><span'+ed(1,"rules."+i,"rule")+'>'+r+'</span> '+delBtn("rules",i)+'</li>').join("");
+}
+function routerHTML(){
+  return (DATA.routes||[]).map((r,i)=>'<button class="chip" type="button" data-route="'+i+'" aria-pressed="false">'+esc(r.label)+'</button>').join("");
+}
+
+function render(keepScroll){
+  const y = window.scrollY;
+  document.getElementById("sections").innerHTML = DATA.sections.map(sectionHTML).join("");
+  document.getElementById("railnav").innerHTML = railHTML();
+  document.getElementById("sheet").innerHTML = sheetHTML();
+  document.getElementById("ruleslist").innerHTML = rulesHTML();
+  document.getElementById("routerchips").innerHTML = routerHTML();
+  document.querySelectorAll("[data-b]").forEach(el=>{
+    const v = get(el.dataset.b); if(v === undefined) return;
+    if(el.dataset.plain){ if(el.textContent !== String(v)) el.textContent = v; }
+    else if(el.innerHTML !== String(v)) el.innerHTML = v;
+  });
+  wireSlots(); applyEdit(); wireObserver(); updateMeter();
+  if(keepScroll) window.scrollTo(0,y);
+}
+
+/* ============ meter ============ */
+function updateMeter(){
+  let total = 0, filled = 0;
+  DATA.sections.forEach(s => (s.images||[]).forEach(im => { total++; if(im.data || im.loaded) filled++; }));
+  document.getElementById("mcount").textContent = filled + "/" + total + " shots";
+  document.getElementById("mbar").style.width = total ? (filled/total*100)+"%" : "0%";
+  DATA.sections.forEach(s=>{
+    const t = document.querySelector('[data-tile="'+s.id+'"]'); const n = document.querySelector('[data-for="'+s.id+'"]');
+    if(t) t.classList.toggle("has", hasShot(s));
+    if(n) n.classList.toggle("has", hasShot(s));
+  });
+}
+
+/* ============ slots ============ */
+function wireSlots(){
+  document.querySelectorAll("figure.slot").forEach(fig=>{
+    const [si,ii] = fig.dataset.slot.split(".").map(Number);
+    const im = DATA.sections[si].images[ii];
+    const img = fig.querySelector("img");
+    img.addEventListener("load", ()=>{ if(img.naturalWidth>1){ fig.classList.remove("empty"); im.loaded = true; updateMeter(); } });
+    img.addEventListener("error", ()=>{ fig.classList.add("empty"); im.loaded = false; });
+    if(im.data){ fig.classList.remove("empty"); }
+    ["dragenter","dragover"].forEach(ev=>fig.addEventListener(ev,e=>{e.preventDefault();fig.classList.add("over");}));
+    ["dragleave","dragend"].forEach(ev=>fig.addEventListener(ev,()=>fig.classList.remove("over")));
+    fig.addEventListener("drop", async e=>{
+      e.preventDefault(); fig.classList.remove("over");
+      const f = e.dataTransfer.files && e.dataTransfer.files[0];
+      if(!f || !f.type.startsWith("image/")) return;
+      await acceptImage(si, ii, f, fig, img);
+    });
+  });
+}
+async function acceptImage(si, ii, file, fig, img){
+  const im = DATA.sections[si].images[ii];
+  const ext = (file.name.split(".").pop() || "png").toLowerCase();
+  im.f = im.f.replace(/\.[a-z0-9]+$/i, "." + ext);
+  if(dirHandle){
+    try{
+      const dir = await dirHandle.getDirectoryHandle("images", {create:true});
+      const fh = await dir.getFileHandle(im.f, {create:true});
+      const w = await fh.createWritable(); await w.write(file); await w.close();
+      im.data = ""; im.loaded = true;
+      img.src = "images/" + im.f + "?t=" + Date.now();
+      fig.classList.remove("empty","pending");
+      mark("dirty"); render(true);
+      return;
+    }catch(err){ console.warn("folder write failed, embedding instead", err); }
+  }
+  const rd = new FileReader();
+  rd.onload = () => {
+    im.data = rd.result; im.loaded = true;
+    img.src = rd.result; fig.classList.remove("empty"); fig.classList.add("pending");
+    mark("dirty"); updateMeter();
+  };
+  rd.readAsDataURL(file);
+}
+
+/* ============ edit mode ============ */
+function applyEdit(){
+  document.body.classList.toggle("edit", editing);
+  document.querySelectorAll("[data-b]").forEach(el=>{
+    if(editing) el.setAttribute("contenteditable","true"); else el.removeAttribute("contenteditable");
+  });
+  document.getElementById("btnEdit").classList.toggle("on", editing);
+  document.getElementById("btnEdit").textContent = editing ? "Done editing" : "Edit content";
+}
+document.addEventListener("input", e=>{
+  const el = e.target.closest("[data-b]"); if(!el || !editing) return;
+  const val = el.dataset.plain ? el.innerText.trim() : el.innerHTML;
+  set(el.dataset.b, val);
+  if(el.classList.contains("copy")) el.dataset.copy = el.innerText.trim();
+  mark("dirty");
+});
+document.addEventListener("paste", e=>{
+  const el = e.target.closest("[data-b]"); if(!el || !editing) return;
+  e.preventDefault();
+  const txt = (e.clipboardData || window.clipboardData).getData("text/plain");
+  document.execCommand("insertText", false, txt);
+});
+
+/* ============ list actions ============ */
+document.addEventListener("click", e=>{
+  const b = e.target.closest("[data-act]"); if(!b) return;
+  const act = b.dataset.act;
+  if(act === "del"){
+    const list = get(b.dataset.list); list.splice(+b.dataset.i,1);
+  } else if(act === "add"){
+    get(b.dataset.list).push("New line — click to edit");
+  } else if(act === "addcode"){
+    get(b.dataset.list).push({t:"New step — click to edit", c:"command or URL"});
+  } else if(act === "addop"){
+    const p = b.dataset.list, parts = p.split("."), sec = DATA.sections[+parts[1]];
+    sec.ops = sec.ops || []; sec.ops.push(["operator","what it does"]);
+  } else if(act === "addimg"){
+    const parts = b.dataset.list.split("."), sec = DATA.sections[+parts[1]];
+    sec.images = sec.images || [];
+    sec.images.push({f: sec.id + "-" + (sec.images.length+1) + ".png", c:"Caption", data:""});
+  } else if(act === "clearimg"){
+    const [si,ii] = b.dataset.slot.split(".").map(Number);
+    const im = DATA.sections[si].images[ii]; im.data = ""; im.loaded = false;
+  } else if(act === "delsection"){
+    if(!confirm("Delete this whole tool section?")) return;
+    DATA.sections.splice(+b.dataset.i,1);
+  } else if(act === "addsection"){
+    const n = String(DATA.sections.length+1).padStart(2,"0");
+    DATA.sections.push({id:"tool-"+Date.now(), num:n, family:"forensic", platform:"Platform", short:"Short label",
+      title:"New tool", purpose:"What this tool is for and when to reach for it.",
+      yes:["What it can establish"], no:["What it cannot"],
+      steps:[{t:"First step."}], ops:[], images:[{f:"new-tool-1.png",c:"Caption",data:""}], notes:[], tags:"", links:[]});
+  } else if(act === "addrule"){
+    DATA.rules.push("New ground rule");
+  } else return;
+  if(!editing){ editing = true; }
+  mark("dirty"); render(true);
+});
+
+/* ============ steps with no code field get one on demand ============ */
+/* ============ copy ============ */
+document.addEventListener("click", e=>{
+  const b = e.target.closest(".copy"); if(!b || editing) return;
+  const text = b.dataset.copy || b.innerText;
+  const done = ()=>{ b.classList.add("done"); setTimeout(()=>b.classList.remove("done"),1200); };
+  if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(done).catch(()=>{}); }
+  else { const ta=document.createElement("textarea"); ta.value=text; document.body.appendChild(ta); ta.select();
+    try{ document.execCommand("copy"); done(); }catch(err){} document.body.removeChild(ta); }
+});
+
+/* ============ router ============ */
+document.addEventListener("click", e=>{
+  const b = e.target.closest("[data-route]"); if(!b) return;
+  const wrap = document.getElementById("routerchips");
+  const active = b.getAttribute("aria-pressed") === "true";
+  wrap.querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed","false"));
+  const out = document.getElementById("routeout");
+  if(active){ out.innerHTML=""; return; }
+  b.setAttribute("aria-pressed","true");
+  const r = DATA.routes[+b.dataset.route], map = byId();
+  out.innerHTML = '<ol>'+r.ids.map((id,i)=>{
+    const s = map[id]; if(!s) return "";
+    return '<li><span class="n">'+esc(s.num)+'</span><span><a href="#'+id+'">'+esc(s.short||s.title)+'</a> <span class="why">— '+esc(r.why[i]||"")+'</span></span></li>';
+  }).join("")+'</ol>';
+});
+
+/* ============ filter ============ */
+document.getElementById("finder").addEventListener("input", function(){
+  const q = this.value.trim().toLowerCase(); let shown = 0;
+  DATA.sections.forEach(s=>{
+    const el = document.getElementById(s.id); if(!el) return;
+    const hay = (s.title+" "+s.platform+" "+s.purpose+" "+(s.tags||"")+" "+(s.short||"")+" "+
+      (s.ops||[]).map(o=>o.join(" ")).join(" ")+" "+(s.steps||[]).map(x=>x.t+" "+(x.c||"")).join(" ")).toLowerCase();
+    const hit = !q || hay.includes(q);
+    el.style.display = hit ? "" : "none";
+    const nav = document.querySelector('[data-for="'+s.id+'"]'); if(nav) nav.parentElement.style.display = hit ? "" : "none";
+    if(hit) shown++;
+  });
+  document.getElementById("noresult").style.display = shown ? "none" : "block";
+});
+
+/* ============ active nav ============ */
+let obs = null;
+function wireObserver(){
+  if(typeof IntersectionObserver === "undefined") return;
+  if(obs) obs.disconnect();
+  const links = new Map();
+  document.querySelectorAll("[data-for]").forEach(a=>links.set(a.dataset.for,a));
+  obs = new IntersectionObserver(entries=>{
+    entries.forEach(en=>{
+      if(en.isIntersecting){
+        links.forEach(a=>a.classList.remove("on"));
+        const a = links.get(en.target.id); if(a) a.classList.add("on");
+      }
+    });
+  },{rootMargin:"-12% 0px -70% 0px",threshold:0});
+  DATA.sections.forEach(s=>{ const el = document.getElementById(s.id); if(el) obs.observe(el); });
+}
+
+/* ============ save ============ */
+function serialize(){
+  const clean = JSON.parse(JSON.stringify(DATA));
+  clean.sections.forEach(s=>(s.images||[]).forEach(i=>{ delete i.loaded; }));
+  const json = JSON.stringify(clean, null, 1).replace(/<\//g, "<\\/");
+  const dataEl = document.getElementById("data");
+  const keepSections = document.getElementById("sections").innerHTML;
+  const keepRail = document.getElementById("railnav").innerHTML;
+  const keepSheet = document.getElementById("sheet").innerHTML;
+  const keepRules = document.getElementById("ruleslist").innerHTML;
+  const keepChips = document.getElementById("routerchips").innerHTML;
+  const keepOut = document.getElementById("routeout").innerHTML;
+  const wasEdit = document.body.className;
+  dataEl.textContent = json;
+  document.getElementById("sections").innerHTML = "";
+  document.getElementById("railnav").innerHTML = "";
+  document.getElementById("sheet").innerHTML = "";
+  document.getElementById("ruleslist").innerHTML = "";
+  document.getElementById("routerchips").innerHTML = "";
+  document.getElementById("routeout").innerHTML = "";
+  document.body.className = "";
+  document.getElementById("help").classList.remove("show");
+  document.querySelectorAll("[contenteditable]").forEach(el=>el.removeAttribute("contenteditable"));
+  const bE = document.getElementById("btnEdit"), bF = document.getElementById("btnFolder"), st = document.getElementById("status");
+  const keepBtns = [bE.textContent, bE.className, bF.textContent, bF.className, st.textContent, st.className];
+  bE.textContent = "Edit content"; bE.className = "btn";
+  bF.textContent = "Connect folder"; bF.className = "btn";
+  st.textContent = "viewing"; st.className = "status";
+  const html = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+  bE.textContent = keepBtns[0]; bE.className = keepBtns[1];
+  bF.textContent = keepBtns[2]; bF.className = keepBtns[3];
+  st.textContent = keepBtns[4]; st.className = keepBtns[5];
+  document.getElementById("sections").innerHTML = keepSections;
+  document.getElementById("railnav").innerHTML = keepRail;
+  document.getElementById("sheet").innerHTML = keepSheet;
+  document.getElementById("ruleslist").innerHTML = keepRules;
+  document.getElementById("routerchips").innerHTML = keepChips;
+  document.getElementById("routeout").innerHTML = keepOut;
+  document.body.className = wasEdit;
+  wireSlots(); applyEdit(); wireObserver(); updateMeter();
+  return html;
+}
+function fileName(){
+  const p = decodeURIComponent(location.pathname.split("/").pop() || "");
+  return p && p.endsWith(".html") ? p : "fact-checking-handbook.html";
+}
+async function save(){
+  const html = serialize();
+  if(dirHandle){
+    try{
+      const fh = await dirHandle.getFileHandle(fileName(), {create:true});
+      const w = await fh.createWritable(); await w.write(html); await w.close();
+      document.querySelectorAll("figure.slot.pending").forEach(f=>f.classList.remove("pending"));
+      mark("saved"); return;
+    }catch(err){ alert("Could not write to the folder: " + err.message + "\nFalling back to a download."); }
+  }
+  const blob = new Blob([html], {type:"text/html"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = fileName();
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+  mark("saved");
+}
+document.getElementById("btnSave").addEventListener("click", save);
+document.getElementById("btnEdit").addEventListener("click", ()=>{ editing = !editing; applyEdit(); mark(); });
+document.getElementById("btnHelp").addEventListener("click", ()=>document.getElementById("help").classList.toggle("show"));
+document.getElementById("btnFolder").addEventListener("click", async ()=>{
+  if(!window.showDirectoryPicker){
+    document.getElementById("help").classList.add("show");
+    alert("This browser can't write to folders from here.\n\nUse Chrome or Edge, and serve the folder over http (python3 -m http.server 8000) rather than opening the file directly. Save still works as a download.");
+    return;
+  }
+  try{
+    dirHandle = await window.showDirectoryPicker({mode:"readwrite"});
+    const btn = document.getElementById("btnFolder");
+    btn.textContent = "Folder: " + dirHandle.name; btn.classList.add("on");
+  }catch(err){ /* cancelled */ }
+});
+document.addEventListener("keydown", e=>{
+  if((e.metaKey || e.ctrlKey) && e.key === "s"){ e.preventDefault(); save(); }
+});
+window.addEventListener("beforeunload", e=>{ if(dirty){ e.preventDefault(); e.returnValue = ""; } });
+
+render();
+</script>
+</body>
+</html>
