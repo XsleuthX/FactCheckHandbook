@@ -3,220 +3,245 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>The Factcheck Handbook</title>
+<title>Verification Desk</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
-  --room:#15171B; --room-2:#1B1E24; --edge:#2B303A; --edge-2:#3A4150;
-  --plate:#F3F1EC; --plate-ink:#15171B;
-  --label:#9AA2AE; --label-dim:#6B7280;
-  --brass:#C9A227; --brass-dim:#8A7228;
-  --sage:#7EA890; --clay:#C4635C;
-  --serif:"Instrument Serif",Georgia,serif;
-  --sans:"IBM Plex Sans","Noto Sans SC",system-ui,sans-serif;
+  --bg1:#FCFCFE; --bg2:#F0EFFA; --card:#FFFFFF; --card-2:#F7F7FC;
+  --ink:#131320; --ink-2:#5A5A70; --ink-3:#8B8BA3; --line:#EAE9F4;
+  --violet:#6C5CE7; --violet-2:#8B7CF0; --violet-soft:#F0EDFE;
+  --sage:#1F9D74; --sage-soft:#E6F6F0; --clay:#D2695E; --clay-soft:#FCEDEB;
+  --sans:"Plus Jakarta Sans","Noto Sans SC",system-ui,sans-serif;
   --mono:"IBM Plex Mono",Consolas,monospace;
-  --step:cubic-bezier(.22,.61,.36,1);
+  --r:20px; --rs:14px;
+  --sh:0 1px 2px rgba(19,19,32,.04), 0 8px 26px rgba(80,70,180,.06);
+  --sh-2:0 2px 6px rgba(19,19,32,.05), 0 18px 44px rgba(80,70,180,.10);
+  --e:cubic-bezier(.22,.61,.36,1);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
-body{margin:0;background:var(--room);color:var(--plate);font-family:var(--sans);font-size:16px;line-height:1.55;
-  -webkit-font-smoothing:antialiased;overflow:hidden;overscroll-behavior:none}
+body{margin:0;color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;
+  background:linear-gradient(175deg,var(--bg1) 0%,var(--bg2) 100%);background-attachment:fixed;
+  -webkit-font-smoothing:antialiased;overflow:hidden}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
-a{color:var(--brass);text-underline-offset:3px}
-:focus-visible{outline:2px solid var(--brass);outline-offset:3px}
-::selection{background:var(--brass);color:var(--room)}
+a{color:var(--violet);text-decoration:none}
+:focus-visible{outline:2px solid var(--violet);outline-offset:3px}
+::selection{background:var(--violet-soft)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
-/* ---------- scaffold ---------- */
 #app{position:fixed;inset:0;display:flex;flex-direction:column}
-.view{position:absolute;inset:0;display:none;flex-direction:column;opacity:0}
-.view.on{display:flex;opacity:1;animation:fade .45s var(--step)}
-@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.view{position:absolute;inset:0;display:none;flex-direction:column}
+.view.on{display:flex;animation:in .4s var(--e)}
+@keyframes in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 
-/* ---------- top rail ---------- */
-.rail{flex:none;display:flex;align-items:center;gap:14px;padding:calc(env(safe-area-inset-top) + 14px) 20px 12px;
-  border-bottom:1px solid var(--edge)}
-.rail .name{font-family:var(--mono);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--label);
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rail .sp{margin-left:auto}
-.icobtn{width:34px;height:34px;display:grid;place-items:center;border:1px solid var(--edge);border-radius:2px;color:var(--label);flex:none}
-.icobtn:hover{border-color:var(--brass);color:var(--brass)}
-.icobtn.act{border-color:var(--brass);color:var(--brass)}
-
-/* ticks */
-.ticks{display:flex;gap:4px;flex:1;max-width:340px;margin:0 auto}
-.tick{flex:1;height:2px;background:var(--edge-2);border-radius:2px;padding:0;min-width:6px}
-.tick.done{background:var(--brass-dim)}
-.tick.now{background:var(--brass)}
+/* ---------- top bar ---------- */
+.bar{flex:none;display:flex;align-items:center;gap:8px;padding:calc(env(safe-area-inset-top) + 14px) 20px 12px;
+  max-width:1240px;width:100%;margin:0 auto}
+.brand{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);
+  border-radius:999px;padding:7px 14px 7px 9px;box-shadow:var(--sh);font-weight:600;font-size:13.5px;white-space:nowrap}
+.brand .o{width:17px;height:17px;border-radius:50%;background:conic-gradient(from 210deg,var(--violet),#A9B4F5,#E8C6F2,var(--violet))}
+.pills{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.pills::-webkit-scrollbar{display:none}
+.pill{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:7px 14px;font-size:13px;
+  font-weight:500;color:var(--ink-2);box-shadow:var(--sh);white-space:nowrap;transition:.18s var(--e)}
+.pill:hover{color:var(--ink);transform:translateY(-1px)}
+.pill.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.search{margin-left:auto;display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);
+  border-radius:999px;padding:8px 14px;box-shadow:var(--sh);min-width:190px}
+.search input{border:0;background:none;outline:none;font:inherit;font-size:13px;width:100%;color:var(--ink)}
+.search input::placeholder{color:var(--ink-3)}
+.search svg{color:var(--ink-3);flex:none}
+@media(max-width:720px){.search{min-width:0;width:42px;padding:8px 11px}.search input{display:none}}
 
 /* ---------- hall ---------- */
-.hall{flex:1;overflow-y:auto;padding:0 20px calc(env(safe-area-inset-bottom) + 40px);display:flex;flex-direction:column;justify-content:center}
-.hall-in{width:100%;max-width:900px;margin:0 auto;padding:36px 0}
-.overline{font-family:var(--mono);font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--brass);margin:0 0 18px}
-.hall h1{font-family:var(--serif);font-weight:400;font-size:clamp(38px,8.5vw,74px);line-height:.98;letter-spacing:-.015em;margin:0 0 16px}
-.hall h1 em{font-style:italic;color:var(--brass)}
-.hall .sub{color:var(--label);max-width:38ch;margin:0 0 40px;font-size:16.5px}
-.doors{display:grid;gap:1px;background:var(--edge);border:1px solid var(--edge)}
-@media(min-width:760px){.doors{grid-template-columns:1fr 1fr}}
-.door{display:flex;align-items:center;gap:18px;padding:20px 22px;background:var(--room);text-align:left;transition:background .25s var(--step)}
-.door:hover,.door:focus-visible{background:var(--room-2)}
-.door svg{flex:none;width:52px;height:52px;color:var(--brass);opacity:.85;transition:transform .35s var(--step)}
-.door:hover svg{transform:scale(1.06)}
-.door .n{font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--label-dim);display:block;margin-bottom:5px}
-.door .t{font-family:var(--serif);font-size:25px;line-height:1.05;display:block}
-.door .d{color:var(--label);font-size:13.5px;display:block;margin-top:5px}
+.scroll{flex:1;overflow-y:auto;padding:0 20px calc(env(safe-area-inset-bottom) + 40px)}
+.wrap{max-width:1240px;margin:0 auto}
+.hall-grid{display:grid;gap:14px;grid-template-columns:1fr}
+@media(min-width:980px){.hall-grid{grid-template-columns:1fr 330px}}
+
+.hero{position:relative;background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:26px 28px 24px;box-shadow:var(--sh-2);overflow:hidden;min-height:330px;display:flex;flex-direction:column}
+.orb{position:absolute;right:-40px;top:50%;transform:translateY(-50%);width:340px;height:340px;pointer-events:none;
+  background:
+    radial-gradient(circle at 38% 34%, rgba(255,255,255,.95) 0%, rgba(255,255,255,0) 42%),
+    radial-gradient(circle at 62% 30%, rgba(163,148,255,.55) 0%, rgba(163,148,255,0) 55%),
+    radial-gradient(circle at 32% 68%, rgba(126,196,255,.45) 0%, rgba(126,196,255,0) 58%),
+    radial-gradient(circle at 70% 72%, rgba(226,178,255,.5) 0%, rgba(226,178,255,0) 60%),
+    radial-gradient(circle at 50% 50%, rgba(236,234,255,.9) 0%, rgba(236,234,255,0) 70%);
+  filter:blur(6px);border-radius:50%;animation:drift 16s ease-in-out infinite alternate}
+@keyframes drift{from{transform:translateY(-52%) scale(1)}to{transform:translateY(-46%) scale(1.06)}}
+@media(max-width:700px){.orb{width:230px;height:230px;right:-70px;opacity:.85}}
+.chip{display:inline-flex;align-items:center;gap:7px;align-self:flex-start;background:var(--card-2);border:1px solid var(--line);
+  border-radius:999px;padding:5px 12px;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2)}
+.hero h1{position:relative;font-size:clamp(30px,4.6vw,44px);line-height:1.08;letter-spacing:-.035em;font-weight:800;
+  margin:18px 0 12px;max-width:15ch}
+.hero p{position:relative;color:var(--ink-2);max-width:34ch;margin:0 0 auto;font-size:15.5px}
+.tags{position:relative;display:flex;gap:8px;flex-wrap:wrap;margin:20px 0 16px}
+.tag{font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+.go{position:relative;align-self:flex-start;display:inline-flex;align-items:center;gap:10px;background:var(--card);
+  border:1px solid var(--line);border-radius:999px;padding:8px 8px 8px 18px;font-weight:600;font-size:14px;box-shadow:var(--sh);
+  transition:.2s var(--e)}
+.go .arw{width:28px;height:28px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;transition:.2s var(--e)}
+.go:hover{transform:translateY(-1px);box-shadow:var(--sh-2)}
+.go:hover .arw{background:var(--violet)}
+
+.side{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;box-shadow:var(--sh);
+  display:flex;flex-direction:column}
+.side-h{display:flex;align-items:center;justify-content:space-between;margin:2px 4px 12px}
+.side-h b{font-size:14px;font-weight:600}
+.side-h a,.side-h button{font-size:12px;color:var(--ink-3)}
+.rlist{display:grid;gap:4px}
+.ritem{display:grid;grid-template-columns:1fr 62px;gap:12px;align-items:center;padding:9px 8px;border-radius:var(--rs);
+  text-align:left;transition:.18s var(--e)}
+.ritem:hover{background:var(--card-2)}
+.ritem .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--violet);display:block}
+.ritem .t{font-size:13.5px;font-weight:600;line-height:1.3;display:block;margin-top:3px}
+.ritem .d{font-size:12px;color:var(--ink-3);display:block;line-height:1.35;margin-top:2px}
+.ritem img{width:62px;height:46px;object-fit:cover;border-radius:9px;border:1px solid var(--line);background:var(--card-2)}
+
+.rowhead{display:flex;align-items:baseline;justify-content:space-between;margin:26px 4px 12px}
+.rowhead b{font-size:15px;font-weight:600}
+.rowhead span{font-size:12.5px;color:var(--ink-3)}
+.cards{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+.mini{background:var(--card);border:1px solid var(--line);border-radius:var(--rs);overflow:hidden;box-shadow:var(--sh);
+  text-align:left;transition:.2s var(--e);display:flex;flex-direction:column}
+.mini:hover{transform:translateY(-2px);box-shadow:var(--sh-2)}
+.mini img{width:100%;height:104px;object-fit:cover;background:var(--card-2);border-bottom:1px solid var(--line)}
+.mini .b{padding:11px 13px 13px}
+.mini .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;color:var(--ink-3)}
+.mini .t{font-size:13.5px;font-weight:600;line-height:1.3;margin-top:4px}
+.mini .d{font-size:12px;color:var(--ink-3);margin-top:3px}
 
 /* ---------- stage ---------- */
-.stage{flex:1;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;
-  padding:0 20px calc(env(safe-area-inset-bottom) + 96px)}
-.panel{width:100%;max-width:620px;margin:0 auto;flex:1;display:flex;flex-direction:column;justify-content:center;padding:26px 0 10px}
-.plate{display:grid;place-items:center;margin:0 auto 30px;width:min(300px,62vw)}
-.plate svg{width:100%;height:auto;color:var(--brass)}
-.eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--label-dim);margin:0 0 12px;text-align:center}
-.head{font-family:var(--serif);font-weight:400;font-size:clamp(30px,7.4vw,46px);line-height:1.02;letter-spacing:-.012em;
-  margin:0 0 14px;text-align:center;text-wrap:balance}
-.head em{font-style:italic;color:var(--brass)}
-.line{color:var(--label);font-size:17px;line-height:1.6;text-align:center;margin:0 auto;max-width:34ch;text-wrap:pretty}
-.badges{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:20px}
-.badge{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
-  border:1px solid var(--edge-2);padding:5px 10px;border-radius:2px;color:var(--label)}
-.badge.can{border-color:rgba(126,168,144,.5);color:var(--sage)}
-.badge.cant{border-color:rgba(196,99,92,.45);color:var(--clay)}
+.stage-bar{flex:none;display:flex;align-items:center;gap:10px;padding:calc(env(safe-area-inset-top) + 14px) 20px 10px;
+  max-width:1240px;width:100%;margin:0 auto}
+.ico{width:34px;height:34px;flex:none;display:grid;place-items:center;background:var(--card);border:1px solid var(--line);
+  border-radius:999px;color:var(--ink-2);box-shadow:var(--sh)}
+.ico:hover{color:var(--ink)}
+.ico.on{background:var(--violet);border-color:var(--violet);color:#fff}
+.crumb{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ticks{display:flex;gap:4px;flex:1;max-width:300px;margin:0 auto}
+.tick{flex:1;height:3px;border-radius:99px;background:var(--line);padding:0;min-width:5px;transition:.3s var(--e)}
+.tick.done{background:#C9C3F2}
+.tick.now{background:var(--violet)}
 
-/* more drawer */
-.more{margin:26px auto 0;max-width:38ch;width:100%}
-.more-t{display:flex;align-items:center;gap:8px;margin:0 auto;font-family:var(--mono);font-size:10.5px;
-  letter-spacing:.16em;text-transform:uppercase;color:var(--label-dim);padding:8px 0}
-.more-t:hover{color:var(--brass)}
-.more-t .car{transition:transform .3s var(--step)}
+.panelwrap{flex:1;overflow-y:auto;padding:6px 20px calc(env(safe-area-inset-bottom) + 96px)}
+.panel{max-width:660px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:var(--sh-2);overflow:hidden;animation:in .35s var(--e)}
+.shot{margin:0;background:var(--card-2);border-bottom:1px solid var(--line)}
+.shot img{display:block;width:100%;height:auto}
+.shot figcaption{font-size:12.5px;color:var(--ink-3);padding:9px 18px 11px;border-top:1px solid var(--line);background:var(--card)}
+.glyph{display:grid;place-items:center;padding:28px 0 6px}
+.glyph svg{width:112px;height:112px;color:var(--violet);opacity:.9}
+.body{padding:22px 26px 26px}
+.eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3);margin:0 0 10px}
+.head{font-size:clamp(23px,4.4vw,31px);line-height:1.1;letter-spacing:-.03em;font-weight:800;margin:0 0 12px;text-wrap:balance}
+.head em{font-style:normal;color:var(--violet)}
+.line{color:var(--ink-2);font-size:16px;margin:0;max-width:44ch}
+.badges{display:flex;gap:7px;flex-wrap:wrap;margin-top:16px}
+.badge{font-size:11.5px;border-radius:999px;padding:5px 11px;border:1px solid var(--line);color:var(--ink-2);background:var(--card-2)}
+.badge.can{background:var(--sage-soft);border-color:#CCEBDF;color:var(--sage)}
+.badge.cant{background:var(--clay-soft);border-color:#F4D6D2;color:var(--clay)}
+
+.more{margin-top:20px;border-top:1px solid var(--line);padding-top:6px}
+.more-t{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:10px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink-3);padding:9px 0}
+.more-t:hover{color:var(--violet)}
+.more-t .car{transition:.3s var(--e)}
 .more.open .more-t .car{transform:rotate(180deg)}
-.more-b{display:none;border-top:1px solid var(--edge);padding-top:14px}
-.more.open .more-b{display:block;animation:fade .35s var(--step)}
-.more-b ul{margin:0;padding:0;list-style:none;display:grid;gap:11px}
-.more-b li{color:var(--label);font-size:14.5px;line-height:1.55;padding-left:16px;position:relative}
-.more-b li:before{content:"";position:absolute;left:0;top:9px;width:6px;height:1px;background:var(--brass-dim)}
-.more-b b,.more-b strong{color:var(--plate);font-weight:500}
+.more-b{display:none}
+.more.open .more-b{display:block;animation:in .3s var(--e)}
+.more-b ul{margin:2px 0 6px;padding:0;list-style:none;display:grid;gap:10px}
+.more-b li{color:var(--ink-2);font-size:14px;line-height:1.55;padding-left:15px;position:relative}
+.more-b li:before{content:"";position:absolute;left:0;top:9px;width:6px;height:6px;border-radius:50%;background:var(--violet-soft);border:1px solid #D6CFFA}
+.more-b b,.more-b strong{color:var(--ink);font-weight:600}
+.inline{font-family:var(--mono);font-size:12.5px;background:var(--card-2);border:1px solid var(--line);padding:1px 6px;border-radius:6px}
 
-/* action + links */
-.acts{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;margin-top:24px}
-.act{font-family:var(--sans);font-size:13.5px;font-weight:500;padding:10px 16px;border:1px solid var(--edge-2);
-  border-radius:2px;color:var(--plate);text-decoration:none;display:inline-flex;align-items:center;gap:7px;
-  transition:border-color .2s,color .2s,background .2s}
-.act:hover{border-color:var(--brass);color:var(--brass)}
-.act.key{background:var(--brass);border-color:var(--brass);color:var(--room);font-weight:600}
-.act.key:hover{background:#DDB62F;border-color:#DDB62F;color:var(--room)}
-.act:disabled{opacity:.35;cursor:default}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.act{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:9px 16px;font-size:13.5px;
+  font-weight:500;color:var(--ink);box-shadow:var(--sh);transition:.18s var(--e);display:inline-flex;align-items:center;gap:7px}
+.act:hover{transform:translateY(-1px);box-shadow:var(--sh-2);color:var(--violet)}
+.act.key{background:var(--ink);border-color:var(--ink);color:#fff}
+.act.key:hover{background:var(--violet);border-color:var(--violet);color:#fff}
+.act:disabled{opacity:.4}
+.code{font-family:var(--mono);font-size:12.5px;background:var(--card-2);border:1px solid var(--line);border-radius:12px;
+  padding:11px 14px;margin-top:16px;color:var(--ink-2);word-break:break-word;text-align:left;width:100%;display:block;position:relative}
+.code:hover{border-color:#D6CFFA;color:var(--ink)}
+.code.done{border-color:var(--sage);background:var(--sage-soft)}
 
-/* ---------- bottom bar ---------- */
-.foot{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;gap:14px;
-  padding:12px 20px calc(env(safe-area-inset-bottom) + 14px);
-  background:linear-gradient(to top,var(--room) 62%,rgba(21,23,27,0));pointer-events:none}
-.foot > *{pointer-events:auto}
-.step-of{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;color:var(--label-dim);margin:0 auto}
-.arrow{width:44px;height:44px;border:1px solid var(--edge-2);border-radius:50%;display:grid;place-items:center;color:var(--plate)}
-.arrow:hover:not(:disabled){border-color:var(--brass);color:var(--brass)}
-.arrow:disabled{opacity:.25;cursor:default}
-
-/* ---------- demos ---------- */
-.demo{width:100%;max-width:420px;margin:22px auto 0;border:1px solid var(--edge);background:var(--room-2);padding:16px}
-.demo.wide{max-width:520px}
-.f{display:grid;gap:6px;margin-bottom:12px}
-.f label{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--label-dim)}
-.f input{padding:10px 11px;border:1px solid var(--edge-2);background:var(--room);color:var(--plate);
-  border-radius:2px;font-family:var(--mono);font-size:14px;width:100%}
-.f input:focus{border-color:var(--brass);outline:none}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.read{font-family:var(--mono);font-size:12.5px;line-height:1.75;white-space:pre-wrap;word-break:break-word;
-  color:var(--label);border-top:1px solid var(--edge);margin-top:14px;padding-top:13px}
-.read b{color:var(--brass);font-weight:500}
-.read i{color:var(--plate);font-style:normal}
-.rng{width:100%;accent-color:var(--brass);background:transparent}
-.rngrow{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}
-.rngrow output{font-family:var(--mono);font-size:13px;color:var(--brass);min-width:64px;text-align:right}
-.drop{border:1px dashed var(--edge-2);background:var(--room);min-height:120px;display:grid;place-items:center;gap:7px;
-  padding:22px;text-align:center;cursor:pointer;border-radius:2px}
-.drop:hover,.drop.over{border-color:var(--brass)}
-.drop .h{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--label)}
-.drop .s{font-size:12.5px;color:var(--label-dim)}
-.cstage{position:relative;display:none;touch-action:none;user-select:none;line-height:0;background:#0B0C0F}
-.cstage.on{display:block}
-.cstage canvas{width:100%;height:auto;display:block}
-.csel{position:absolute;border:1px solid var(--brass);box-shadow:0 0 0 9999px rgba(11,12,15,.66);display:none}
-.csel.on{display:block}
-.cout{margin-top:12px;display:none}
-.cout.on{display:block}
-.cout img{max-width:100%;border:1px solid var(--edge-2);display:block}
-.taps{display:grid;gap:6px;margin:0;padding:0;list-style:none}
-.tap{display:flex;gap:11px;align-items:flex-start;width:100%;text-align:left;padding:10px 12px;
-  border:1px solid var(--edge);background:var(--room);border-radius:2px;font-size:14.5px;color:var(--label);line-height:1.4}
-.tap:hover{border-color:var(--edge-2);color:var(--plate)}
-.tap .bx{flex:none;width:15px;height:15px;border:1px solid var(--edge-2);margin-top:2px;display:grid;place-items:center;
-  font-size:10px;color:transparent;border-radius:1px}
-.tap[aria-pressed=true]{border-color:var(--brass);color:var(--plate)}
-.tap[aria-pressed=true] .bx{background:var(--brass);border-color:var(--brass);color:var(--room)}
-.opts{display:grid;gap:7px}
-.opt{text-align:left;padding:12px 14px;border:1px solid var(--edge);border-radius:2px;font-size:14.5px;color:var(--label);line-height:1.4}
-.opt:hover{border-color:var(--edge-2);color:var(--plate)}
-.opt.right{border-color:var(--sage);color:var(--plate)}
-.opt.wrong{border-color:var(--clay);color:var(--plate)}
-.verdict{font-family:var(--serif);font-size:21px;line-height:1.25;color:var(--plate);border-left:2px solid var(--brass);
-  padding-left:14px;margin:18px auto 0;max-width:34ch;text-align:left}
-.logl{list-style:none;margin:0;padding:0;display:grid;gap:1px;background:var(--edge)}
-.logl li{background:var(--room);padding:11px 13px;display:grid;grid-template-columns:auto 1fr;gap:12px;font-size:13.5px;color:var(--label)}
-.logl .t{font-family:var(--mono);font-size:10.5px;color:var(--brass);padding-top:3px}
-.logl .empty{display:block;text-align:center;color:var(--label-dim);font-size:13.5px}
+/* ---------- foot ---------- */
+.foot{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;gap:12px;
+  padding:12px 20px calc(env(safe-area-inset-bottom) + 16px);max-width:1240px;margin:0 auto;
+  background:linear-gradient(to top,var(--bg2) 55%,rgba(240,239,250,0));pointer-events:none}
+.foot>*{pointer-events:auto}
+.nav{width:44px;height:44px;border-radius:50%;background:var(--card);border:1px solid var(--line);display:grid;
+  place-items:center;box-shadow:var(--sh);color:var(--ink)}
+.nav:hover:not(:disabled){color:var(--violet);box-shadow:var(--sh-2)}
+.nav:disabled{opacity:.3}
+.count{margin:0 auto;font-family:var(--mono);font-size:11px;color:var(--ink-3)}
 
 /* ---------- index ---------- */
-.idx{flex:1;overflow-y:auto;padding:0 20px calc(env(safe-area-inset-bottom) + 40px)}
-.idx-in{max-width:820px;margin:0 auto;padding:26px 0 10px}
-.idx h2{font-family:var(--serif);font-weight:400;font-size:34px;margin:0 0 6px}
-.idx .sub{color:var(--label);margin:0 0 26px;font-size:15px}
-.fam{font-family:var(--mono);font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--label-dim);
-  margin:30px 0 10px;padding-bottom:7px;border-bottom:1px solid var(--edge)}
-.tools{display:grid;gap:1px;background:var(--edge);border:1px solid var(--edge)}
-@media(min-width:680px){.tools{grid-template-columns:1fr 1fr}}
-.tool{display:flex;align-items:center;gap:14px;padding:15px 16px;background:var(--room);text-align:left}
-.tool:hover{background:var(--room-2)}
-.tool svg{width:26px;height:26px;flex:none;color:var(--brass);opacity:.8}
-.tool .n{font-family:var(--mono);font-size:10px;color:var(--label-dim);display:block}
-.tool .t{font-size:15px;display:block;margin-top:2px;color:var(--plate)}
-.tool .p{font-size:12.5px;color:var(--label-dim);display:block}
+.idx-h{margin:6px 4px 18px}
+.idx-h h2{font-size:28px;font-weight:800;letter-spacing:-.03em;margin:0 0 4px}
+.idx-h p{color:var(--ink-2);margin:0;font-size:14.5px}
+.fam{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3);margin:26px 4px 10px}
 
-/* ---------- edit ---------- */
-body.ed [data-b]{outline:1px dashed transparent;border-radius:2px}
-body.ed [data-b]:hover{outline-color:var(--edge-2)}
-body.ed [data-b]:focus{outline:1px solid var(--brass);background:rgba(201,162,39,.06)}
-.saved{position:fixed;left:50%;transform:translateX(-50%);bottom:88px;background:var(--brass);color:var(--room);
-  font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;padding:8px 16px;
-  border-radius:2px;opacity:0;pointer-events:none;transition:opacity .3s;z-index:90}
-.saved.on{opacity:1}
-.hint{position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 70px);text-align:center;
-  font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--label-dim);
-  pointer-events:none;opacity:0;transition:opacity .6s}
-.hint.on{opacity:1}
-</style>
-
-<style id="aurora-redesign">
-:root{
- --room:#F2F5FC; --room-2:#FFFFFF; --edge:#DEE3EF; --edge-2:#CBD2E2;
- --plate:#181C29; --plate-ink:#181C29; --label:#626B80; --label-dim:#8A92A5;
- --brass:#6E4BE7; --brass-dim:#A892F0; --sage:#16806E; --clay:#B55345;
-}
-body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transparent 24rem),linear-gradient(135deg,#F9FAFF,#EEF2FB 58%,#F5F1FD);color:var(--plate)}
-#app:before{content:"";position:fixed;z-index:-1;width:460px;height:460px;left:50%;top:16%;transform:translateX(-10%);border-radius:50%;background:radial-gradient(circle at 42% 38%,rgba(255,255,255,.98) 0 5%,rgba(213,199,255,.9) 14%,rgba(119,74,226,.48) 29%,rgba(108,69,213,.10) 54%,transparent 69%);filter:blur(.3px)}
-.homebar{flex:none;display:flex;align-items:center;gap:8px;padding:14px 20px;border-bottom:1px solid rgba(120,131,165,.12);background:rgba(247,249,255,.74);backdrop-filter:blur(18px)}
-.homebrand{display:flex;align-items:center;gap:8px;font-family:var(--sans);font-weight:600;font-size:12px;background:#fff;border:1px solid rgba(120,131,165,.15);border-radius:999px;padding:8px 11px;box-shadow:0 8px 22px rgba(62,68,101,.08)}
-.homebrand:before{content:"✓";display:grid;place-items:center;width:19px;height:19px;border-radius:50%;background:var(--brass);color:#fff;font-size:10px}.homechips{display:flex;gap:7px;margin-left:auto;overflow:auto;scrollbar-width:none}.homechips::-webkit-scrollbar{display:none}.homechips button{font-size:11.5px;color:var(--label);background:rgba(255,255,255,.66);border:1px solid rgba(120,131,165,.12);border-radius:999px;padding:8px 11px;white-space:nowrap}.homechips button:hover{background:#fff;color:var(--brass)}
-.rail{background:rgba(247,249,255,.82);border-color:rgba(120,131,165,.13);backdrop-filter:blur(18px)}.rail .name{color:var(--label)}.icobtn{border:0;border-radius:50%;background:#fff;color:var(--label);box-shadow:inset 0 0 0 1px rgba(120,131,165,.15)}.icobtn:hover,.icobtn.act{background:var(--brass);color:#fff;box-shadow:none}.tick{background:#D8DDEA}.tick.done{background:#B8A7EE}.tick.now{background:var(--brass)}
-.hall{padding-top:20px}.hall-in{max-width:1080px}.overline{display:inline-flex;padding:7px 11px;border-radius:999px;background:rgba(255,255,255,.72);color:var(--brass);letter-spacing:.18em}.hall h1{font-family:var(--sans);font-weight:600;max-width:12ch;font-size:clamp(44px,8vw,82px);letter-spacing:-.055em;line-height:.94}.hall h1 em{color:var(--brass)}.hall .sub{color:var(--label);font-size:17px}.doors{gap:12px;background:transparent;border:0;grid-template-columns:repeat(2,1fr)}.door{border-radius:22px;background:rgba(255,255,255,.78);border:1px solid rgba(120,131,165,.13);box-shadow:0 15px 38px rgba(61,66,99,.08);padding:21px}.door:hover,.door:focus-visible{background:#fff;transform:translateY(-2px);box-shadow:0 20px 42px rgba(61,66,99,.12)}.door svg{color:var(--brass);background:#F0ECFF;border-radius:17px;padding:10px}.door .n{color:var(--brass)}.door .t{font-family:var(--sans);font-weight:600;font-size:22px}.door .d{color:var(--label)}
-.stage{padding-bottom:100px}.panel{max-width:780px;padding-top:36px}.plate{width:min(180px,40vw);margin-bottom:21px;background:rgba(255,255,255,.66);border:1px solid rgba(120,131,165,.13);border-radius:28px;padding:20px;box-shadow:0 14px 34px rgba(61,66,99,.08)}.plate svg{color:var(--brass)}.eyebrow{color:var(--brass)}.head{font-family:var(--sans);font-weight:600;letter-spacing:-.035em}.head em{color:var(--brass)}.line{color:var(--label)}.badge{border:0;border-radius:999px;background:#fff;box-shadow:inset 0 0 0 1px rgba(120,131,165,.15)}.badge.can{color:var(--sage)}.badge.cant{color:var(--clay)}
-.more-b{border-color:var(--edge)}.more-b li{color:var(--label)}.more-b b,.more-b strong{color:var(--plate)}.act{border:0;border-radius:999px;background:#fff;color:var(--plate);box-shadow:inset 0 0 0 1px rgba(120,131,165,.16)}.act:hover{background:var(--brass);color:#fff}.act.key{background:var(--brass);color:#fff}.foot{background:linear-gradient(to top,var(--room) 68%,rgba(242,245,252,0))}.arrow{background:#fff;border:0;color:var(--plate);box-shadow:0 8px 20px rgba(61,66,99,.10)}.arrow:hover:not(:disabled){background:var(--brass);color:#fff}.step-of{color:var(--label-dim)}
-.demo{background:rgba(255,255,255,.76);border:1px solid rgba(120,131,165,.13);border-radius:20px;box-shadow:0 14px 34px rgba(61,66,99,.07)}.f input,.drop,.tap,.opt,.logl li{background:#fff;border-color:var(--edge);color:var(--label)}.read{color:var(--label);border-color:var(--edge)}.read b{color:var(--brass)}.read i{color:var(--plate)}
-.tool-shot{width:min(100%,700px);margin:24px auto 0;border-radius:22px;background:#fff;overflow:hidden;box-shadow:0 18px 45px rgba(61,66,99,.13);border:1px solid rgba(120,131,165,.13)}.tool-shot img{display:block;width:100%;aspect-ratio:16/10;object-fit:cover;background:#E9EDF6}.tool-shot figcaption{padding:12px 15px;font-size:13px;color:var(--label);line-height:1.45}
-.idx{background:transparent}.idx-in{max-width:980px}.idx h2{font-family:var(--sans);font-weight:600;letter-spacing:-.04em}.idx .sub{color:var(--label)}.fam{color:var(--brass);border-color:var(--edge)}.tools{gap:10px;background:transparent;border:0}.tool{border-radius:18px;background:rgba(255,255,255,.76);border:1px solid rgba(120,131,165,.13);box-shadow:0 12px 28px rgba(61,66,99,.06)}.tool:hover{background:#fff;transform:translateY(-1px)}.tool svg{color:var(--brass)}.tool .n{color:var(--brass)}.tool .t{color:var(--plate)}.tool .p{color:var(--label)}
-@media(max-width:680px){#app:before{width:320px;height:320px;left:34%;top:18%}.homebar{padding:10px 12px}.homechips button:nth-child(n+4){display:none}.hall{justify-content:flex-start}.hall-in{padding-top:34px}.doors{grid-template-columns:1fr}.door{padding:17px}.panel{justify-content:flex-start;padding-top:24px}.plate{width:135px}.tool-shot{border-radius:17px}}
+/* ---------- demos ---------- */
+.demo{background:var(--card-2);border:1px solid var(--line);border-radius:var(--rs);padding:15px;margin-top:18px}
+.f{display:grid;gap:6px;margin-bottom:11px}
+.f label{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.f input{padding:10px 12px;border:1px solid var(--line);background:var(--card);border-radius:10px;
+  font-family:var(--mono);font-size:13.5px;width:100%;color:var(--ink);outline:none}
+.f input:focus{border-color:var(--violet)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.read{font-family:var(--mono);font-size:12.5px;line-height:1.7;white-space:pre-wrap;word-break:break-word;color:var(--ink-2);
+  border-top:1px solid var(--line);margin-top:13px;padding-top:12px}
+.read b{color:var(--violet);font-weight:500}
+.read i{color:var(--ink);font-style:normal}
+.rng{width:100%;accent-color:var(--violet)}
+.rngrow{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}
+.rngrow output{font-family:var(--mono);font-size:13px;color:var(--violet);min-width:60px;text-align:right}
+.drop{border:1px dashed #D6CFFA;background:var(--card);border-radius:12px;min-height:104px;display:grid;place-items:center;
+  gap:6px;padding:20px;text-align:center;cursor:pointer}
+.drop:hover,.drop.over{border-color:var(--violet);background:var(--violet-soft)}
+.drop .h{font-size:13px;font-weight:600}
+.drop .s{font-size:12px;color:var(--ink-3)}
+.cstage{position:relative;display:none;touch-action:none;user-select:none;line-height:0;border-radius:12px;overflow:hidden;background:#EDEBF7}
+.cstage.on{display:block}
+.cstage canvas{width:100%;height:auto;display:block}
+.csel{position:absolute;border:2px solid var(--violet);box-shadow:0 0 0 9999px rgba(19,19,32,.35);display:none;border-radius:2px}
+.csel.on{display:block}
+.cout{margin-top:11px;display:none}
+.cout.on{display:block}
+.cout img{max-width:100%;border:1px solid var(--line);border-radius:10px;display:block}
+.taps{display:grid;gap:6px;margin:0;padding:0;list-style:none}
+.tap{display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;padding:10px 12px;border:1px solid var(--line);
+  background:var(--card);border-radius:11px;font-size:13.5px;color:var(--ink-2);line-height:1.4;transition:.16s var(--e)}
+.tap:hover{border-color:#D6CFFA;color:var(--ink)}
+.tap .bx{flex:none;width:16px;height:16px;border:1px solid #CFCEE2;border-radius:5px;margin-top:2px;display:grid;
+  place-items:center;font-size:10px;color:transparent}
+.tap[aria-pressed=true]{border-color:var(--violet);background:var(--violet-soft);color:var(--ink)}
+.tap[aria-pressed=true] .bx{background:var(--violet);border-color:var(--violet);color:#fff}
+.opts{display:grid;gap:7px}
+.opt{text-align:left;padding:12px 14px;border:1px solid var(--line);border-radius:11px;font-size:13.5px;color:var(--ink-2);
+  background:var(--card);line-height:1.4}
+.opt:hover{border-color:#D6CFFA;color:var(--ink)}
+.opt.right{border-color:var(--sage);background:var(--sage-soft);color:var(--ink)}
+.opt.wrong{border-color:var(--clay);background:var(--clay-soft);color:var(--ink)}
+.verdictline{font-size:18px;font-weight:600;line-height:1.35;border-left:3px solid var(--violet);padding-left:14px;margin-top:16px}
+.logl{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.logl li{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:10px 12px;display:grid;
+  grid-template-columns:auto 1fr;gap:11px;font-size:13px;color:var(--ink-2)}
+.logl .t{font-family:var(--mono);font-size:10.5px;color:var(--violet);padding-top:2px}
+.logl .empty{display:block;text-align:center;color:var(--ink-3);font-size:13px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:86px;background:var(--ink);color:#fff;font-size:12.5px;
+  padding:9px 18px;border-radius:999px;opacity:0;pointer-events:none;transition:.3s;z-index:90}
+.toast.on{opacity:1}
+body.ed [data-b]{outline:1px dashed transparent;border-radius:6px}
+body.ed [data-b]:hover{outline-color:#D6CFFA}
+body.ed [data-b]:focus{outline:1px solid var(--violet);background:var(--violet-soft)}
 </style>
 </head>
 <body>
@@ -224,57 +249,80 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
 <div id="app">
   <!-- HALL -->
   <section class="view on" id="v-hall">
-    <div class="homebar"><span class="homebrand">Verification Desk</span><div class="homechips"><button data-room="img">Images +</button><button data-room="geo">Location +</button><button data-room="ai">AI +</button><button data-room="index">All tools +</button></div></div>
-    <div class="hall"><div class="hall-in">
-      <p class="overline">Verification Desk</p>
-      <h1>Fact Check<br>One at a <em>time</em>.</h1>
-      <p class="sub">Step by step tutorial with useful tools and links</p>
-      <div class="doors" id="doors"></div>
+    <div class="bar">
+      <div class="brand"><span class="o"></span>Verification Desk</div>
+      <div class="pills">
+        <button class="pill on" data-jump="hall">Rooms</button>
+        <button class="pill" data-jump="index">All tools</button>
+      </div>
+      <label class="search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+        <input id="q" type="search" placeholder="Search a tool or operator" aria-label="Search">
+      </label>
+    </div>
+    <div class="scroll"><div class="wrap">
+      <div class="hall-grid">
+        <div class="hero">
+          <div class="orb"></div>
+          <span class="chip">Start here</span>
+          <h1>Four rooms. One question each.</h1>
+          <p>Take one at a time. Every room ends with something you can write down.</p>
+          <div class="tags"><span class="tag">#reverseimage</span><span class="tag">#geolocation</span><span class="tag">#provenance</span></div>
+          <button class="go" data-room="img">Enter the first room <span class="arw"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></button>
+        </div>
+        <div class="side">
+          <div class="side-h"><b>The rooms</b><button data-jump="index">All tools →</button></div>
+          <div class="rlist" id="rooms"></div>
+        </div>
+      </div>
+      <div class="rowhead"><b>Most used</b><span>Straight to the tool</span></div>
+      <div class="cards" id="quick"></div>
     </div></div>
   </section>
 
   <!-- STAGE -->
   <section class="view" id="v-stage">
-    <div class="rail">
-      <button class="icobtn" id="s-close" title="Back to the hall" aria-label="Back to the hall">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 5l-7 7 7 7"/></svg></button>
-      <span class="name" id="s-name"></span>
+    <div class="stage-bar">
+      <button class="ico" id="s-back" aria-label="Back">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <span class="crumb" id="s-name"></span>
       <div class="ticks" id="s-ticks"></div>
-      <button class="icobtn sp" id="s-edit" title="Edit this text" aria-label="Edit">
+      <button class="ico" id="s-edit" title="Edit text" aria-label="Edit">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h4L20 8l-4-4L4 16v4z"/></svg></button>
-      <button class="icobtn" id="s-save" title="Save" aria-label="Save">
+      <button class="ico" id="s-save" title="Save" aria-label="Save">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4h11l3 3v13H5z"/><path d="M8 4v6h7"/></svg></button>
     </div>
-    <div class="stage" id="s-stage"><div class="panel" id="s-panel"></div></div>
+    <div class="panelwrap"><div id="s-panel"></div></div>
     <div class="foot">
-      <button class="arrow" id="s-prev" aria-label="Previous">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M15 5l-7 7 7 7"/></svg></button>
-      <span class="step-of" id="s-of"></span>
-      <button class="arrow" id="s-next" aria-label="Next">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 5l7 7-7 7"/></svg></button>
+      <button class="nav" id="s-prev" aria-label="Previous"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <span class="count" id="s-count"></span>
+      <button class="nav" id="s-next" aria-label="Next"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M9 5l7 7-7 7"/></svg></button>
     </div>
-    <p class="hint" id="s-hint">Swipe or use ← →</p>
   </section>
 
   <!-- INDEX -->
   <section class="view" id="v-index">
-    <div class="rail">
-      <button class="icobtn" id="i-close" aria-label="Back to the hall">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 5l-7 7 7 7"/></svg></button>
-      <span class="name">The full index · 17 tools</span>
-      <button class="icobtn sp" id="i-save" title="Save" aria-label="Save">
+    <div class="bar">
+      <button class="ico" id="i-back" aria-label="Back">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <div class="pills"><button class="pill" data-jump="hall">Rooms</button><button class="pill on" data-jump="index">All tools</button></div>
+      <label class="search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+        <input id="q2" type="search" placeholder="Filter" aria-label="Filter tools">
+      </label>
+      <button class="ico" id="i-save" title="Save" aria-label="Save">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4h11l3 3v13H5z"/><path d="M8 4v6h7"/></svg></button>
     </div>
-    <div class="idx"><div class="idx-in" id="i-body"></div></div>
+    <div class="scroll"><div class="wrap" id="i-body"></div></div>
   </section>
 </div>
-<div class="saved" id="toast">Saved</div>
+<div class="toast" id="toast">Saved</div>
 
 <script type="application/json" id="data">{
  "meta": {
   "title": "Verification Desk",
   "subtitle": "Fact-checking tools handbook",
-  "reviewed": "5 August 2026"
+  "reviewed": "3 August 2026"
  },
  "sections": [
   {
@@ -318,6 +366,9 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
     },
     {
      "t": "Archive every result you'll cite before you close the tab."
+    },
+    {
+     "t": "Search accounts by handle, not display name — the United Nations is <span class='inline'>@UN<\/span>, and display names change freely."
     }
    ],
    "ops": [
@@ -376,20 +427,26 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
    ],
    "images": [
     {
-     "f": "01-x-advanced-search.webp",
-     "c": "AFP workshop slide (p. 2): the advanced-search form for building a precise X query.",
+     "f": "x-operators-1.jpg",
+     "c": "X's search bar — Top, Latest, People, Media, Lists",
      "data": ""
     },
     {
-     "f": "01-x-latest-tab.webp",
-     "c": "AFP workshop slide (p. 2): X operator families, with the reminder to switch results to Latest.",
+     "f": "x-operators-2.jpg",
+     "c": "The advanced search form: all/exact/any/none words, hashtags, language",
+     "data": ""
+    },
+    {
+     "f": "x-operators-3.jpg",
+     "c": "Operators you can combine in any search bar",
      "data": ""
     }
    ],
    "notes": [
     "The <span class='inline'>geocode:<\/span> operator still parses but returns almost nothing since the API changes — treat any location claim from it as unverified.",
     "Operators are case-insensitive except OR, which must be uppercase.",
-    "Searching while logged out returns a fraction of the index. Use a dedicated research account."
+    "Searching while logged out returns a fraction of the index. Use a dedicated research account.",
+    "A blue tick is a paid subscription, not a verification. Grey and gold ticks mark government and business accounts. Neither one tells you the account is who it claims."
    ],
    "links": [
     [
@@ -403,7 +460,12 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
    ],
    "tags": "twitter x operators from since until filter min_faves conversation_id",
    "family": "global",
-   "short": "Advanced search"
+   "short": "Advanced search",
+   "shotmap": {
+    "1": 1,
+    "2": 0,
+    "3": 2
+   }
   },
   {
    "id": "x-lists",
@@ -444,6 +506,9 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
     },
     {
      "t": "Check which lists an account already appears on — other journalists' public lists are a free, curated source map for a beat you're new to."
+    },
+    {
+     "t": "The InVID plugin carries the same X search with filters for keyword, account, content type, language, location and a custom time range — useful when x.com itself is being difficult."
     }
    ],
    "ops": [
@@ -462,19 +527,30 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
    ],
    "images": [
     {
-     "f": "02-x-list-private.webp",
-     "c": "AFP workshop slide (p. 3): public versus private X Lists and the visibility implications.",
+     "f": "x-lists-1.jpg",
+     "c": "Lists group accounts by theme — and you can follow other people's",
      "data": ""
     },
     {
-     "f": "02-x-list-id.webp",
-     "c": "AFP workshop slide (p. 3): using Lists to group and monitor accounts by beat.",
+     "f": "x-lists-2.jpg",
+     "c": "Public lists are visible to anyone looking at your account",
+     "data": ""
+    },
+    {
+     "f": "x-lists-3.jpg",
+     "c": "A public list notifies the account you added. Private lists cannot be shared",
+     "data": ""
+    },
+    {
+     "f": "x-lists-4.jpg",
+     "c": "The InVID plugin also offers an X search with the same filters",
      "data": ""
     }
    ],
    "notes": [
     "Switching a private list to public retroactively exposes the whole membership. Never flip it back and forth.",
-    "Build one list per beat and keep them; lists you maintain for a year become genuinely valuable during a breaking story."
+    "Build one list per beat and keep them; lists you maintain for a year become genuinely valuable during a breaking story.",
+    "Adding an account to a <b>public<\/b> list notifies them. Private lists never notify, and cannot be shared with anyone."
    ],
    "links": [
     [
@@ -484,7 +560,13 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
    ],
    "tags": "lists private public monitoring beat list: id",
    "family": "global",
-   "short": "Lists"
+   "short": "Lists",
+   "shotmap": {
+    "0": 0,
+    "2": 1,
+    "3": 2,
+    "8": 3
+   }
   },
   {
    "id": "google-operators",
@@ -587,13 +669,8 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
    ],
    "images": [
     {
-     "f": "03-google-tools-verbatim.webp",
-     "c": "AFP workshop slide (p. 5): a compact reference to Google search operators.",
-     "data": ""
-    },
-    {
-     "f": "03-google-site-filetype.webp",
-     "c": "AFP workshop slide (p. 5): operator examples including site:, filetype:, exclusion and exact phrases.",
+     "f": "google-operators-1.jpg",
+     "c": "Basic search operators on Google",
      "data": ""
     }
    ],
@@ -609,7 +686,10 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
    ],
    "tags": "google operators site filetype intitle inurl before after verbatim dork",
    "family": "open",
-   "short": "Operators"
+   "short": "Operators",
+   "shotmap": {
+    "8": 0
+   }
   },
   {
    "id": "baidu",
@@ -680,13 +760,8 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
    ],
    "images": [
     {
-     "f": "04-baidu-advanced-form.webp",
-     "c": "AFP workshop slide (p. 5): Baidu advanced search for mainland Chinese sources.",
-     "data": ""
-    },
-    {
-     "f": "04-baidu-time-filter.webp",
-     "c": "AFP workshop slide (p. 5): the Baidu advanced-search controls and date fields.",
+     "f": "baidu-1.jpg",
+     "c": "百度高级搜索 — keywords, time window, file format, site",
      "data": ""
     }
    ],
@@ -706,7 +781,10 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
    ],
    "tags": "baidu 百度 高级搜索 快照 gaoji chinese site filetype",
    "family": "open",
-   "short": "Advanced filters"
+   "short": "Advanced filters",
+   "shotmap": {
+    "2": 0
+   }
   },
   {
    "id": "weibo",
@@ -746,13 +824,20 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
      "c": "&region=custom:44:1"
     },
     {
-     "t": "For location-first searching, use the app: 发现 → 附近 → 附近的微博 shows posts by geotag around a point you can drag on the map. There is no desktop equivalent."
+     "t": "On mobile, type the location into the search bar, press Enter, then tap <b>地点 / Places<\/b> on the results page to pick a location tag and read everything posted from it. 发现 → 附近 → 附近的微博 does the same from a draggable map."
     },
     {
-     "t": "Search users separately at s.weibo.com/user, and follow the topic page for a hashtag at s.weibo.com/weibo?q=%23话题%23."
+     "t": "Search users separately at s.weibo.com/user, and follow a hashtag's topic page at s.weibo.com/weibo?q=%23话题%23."
     },
     {
      "t": "Archive every post you'll cite, immediately, plus the user profile page."
+    },
+    {
+     "t": "For location-tagged posts, go to place.weibo.com: search the place, then read the posts pinned to it on the map.",
+     "c": "https://place.weibo.com"
+    },
+    {
+     "t": "To search inside one account, open their profile and use <b>搜索他的微博<\/b> next to 全部微博."
     }
    ],
    "ops": [
@@ -783,20 +868,36 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
    ],
    "images": [
     {
-     "f": "05-weibo-advanced.webp",
-     "c": "AFP workshop slide (p. 6): Weibo advanced search filters for content type, time and account.",
+     "f": "weibo-1.jpg",
+     "c": "Filter users by location, account type, gender, age, tag, school",
      "data": ""
     },
     {
-     "f": "05-weibo-nearby.webp",
-     "c": "AFP workshop slide (p. 7): Weibo location search for posts tagged to a place.",
+     "f": "weibo-2.jpg",
+     "c": "微博高级搜索 — type, contains, and an hour-level time window",
+     "data": ""
+    },
+    {
+     "f": "weibo-3.jpg",
+     "c": "Search inside one account from its profile page",
+     "data": ""
+    },
+    {
+     "f": "weibo-4.jpg",
+     "c": "place.weibo.com — posts tagged to a location, on a map",
+     "data": ""
+    },
+    {
+     "f": "weibo-5.jpg",
+     "c": "On mobile: search the place, then tap Places in the results",
      "data": ""
     }
    ],
    "notes": [
     "A post that vanishes between two of your searches is itself newsworthy — screenshot with the visible timestamp and repost count each time you look.",
     "Geotags on Weibo are user-set and trivially faked. Treat 附近 results as leads for where to look, never as location evidence.",
-    "Reposts (转发) carry the original inside them; if the original is deleted, the repost may still show its text. Search the quoted wording separately."
+    "Reposts (转发) carry the original inside them; if the original is deleted, the repost may still show its text. Search the quoted wording separately.",
+    "The 用户 tab filters people by location, account type, gender, age, tag, school and company — the fastest way to find someone who was near an incident."
    ],
    "links": [
     [
@@ -806,7 +907,14 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
    ],
    "tags": "weibo 微博 高级搜索 附近 timescope region nearby location",
    "family": "china",
-   "short": "Filters + location"
+   "short": "Filters + location",
+   "shotmap": {
+    "2": 1,
+    "7": 4,
+    "8": 0,
+    "10": 3,
+    "11": 2
+   }
   },
   {
    "id": "wechat",
@@ -846,28 +954,55 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
     },
     {
      "t": "If a clip only exists in-app, screen-record it with the account name, timestamp and view count visible in the same frame."
+    },
+    {
+     "t": "No WeChat account? Sogou indexes public 公众号 articles: weixin.sogou.com.",
+     "c": "https://weixin.sogou.com"
     }
    ],
    "images": [
     {
-     "f": "06-wechat-souyisou.webp",
-     "c": "AFP workshop slide (p. 9): in-app WeChat search and content-type filters.",
+     "f": "wechat-1.jpg",
+     "c": "WeChat: 1.4 billion users, and almost none of it is on the open web",
      "data": ""
     },
     {
-     "f": "06-wechat-channels-sort.webp",
-     "c": "AFP workshop slide (p. 10): searching WeChat Channels and comparing recent uploads.",
+     "f": "wechat-2.jpg",
+     "c": "No WeChat account? Sogou indexes public 公众号 articles",
+     "data": ""
+    },
+    {
+     "f": "wechat-3.jpg",
+     "c": "搜一搜 — keyword search, filtered by content type",
+     "data": ""
+    },
+    {
+     "f": "wechat-4.jpg",
+     "c": "The Video tab, with most-recent and most-engaging filters",
+     "data": ""
+    },
+    {
+     "f": "wechat-5.jpg",
+     "c": "Working an example: comments, account, location, past posts",
      "data": ""
     }
    ],
    "notes": [
     "WeChat re-encodes and strips metadata from everything uploaded. A file pulled from WeChat carries no usable EXIF — see 16.",
     "Content on WeChat is removed quietly and quickly. Screen-record first, analyse second.",
-    "There is no reliable third-party WeChat search. Treat any site claiming to offer one with suspicion."
+    "There is no reliable third-party WeChat search. Treat any site claiming to offer one with suspicion.",
+    "People reply on WeChat far more readily than on other platforms. Check their profile, location and past posts before you believe they shot the video."
    ],
    "tags": "wechat 微信 视频号 搜一搜 channels 公众号 video search",
    "family": "china",
-   "short": "Video search"
+   "short": "Video search",
+   "shotmap": {
+    "0": 0,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "8": 1
+   }
   },
   {
    "id": "facebook",
@@ -907,6 +1042,13 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
     },
     {
      "t": "Archive the Facebook result page and each individual post you'll cite. Search URLs expire; posts get deleted."
+    },
+    {
+     "t": "Get a location UID from facebook.com/places — search the city, open the place, and take the last string of numbers from the URL.",
+     "c": "https://www.facebook.com/places"
+    },
+    {
+     "t": "Practise it before you need it: take one claim — a place and a month — and run it five ways. Google, Facebook's own search bar, Who Posted What by specific month, Who Posted What by timerange, and Sowsearch with a date filter. Compare what each returns."
     }
    ],
    "ops": [
@@ -925,20 +1067,36 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
    ],
    "images": [
     {
-     "f": "07-whopostedwhat.webp",
-     "c": "AFP workshop slide (p. 12): Who Posted What for a date-and-location Facebook search.",
+     "f": "facebook-1.jpg",
+     "c": "Filter by location and look inside groups. Mind which account you use",
      "data": ""
     },
     {
-     "f": "07-sowsearch.webp",
-     "c": "AFP workshop slide (p. 11): Facebook search filters for finding witnesses and public posts.",
+     "f": "facebook-2.jpg",
+     "c": "facebook.com/places — the UID is the last string of numbers",
+     "data": ""
+    },
+    {
+     "f": "facebook-3.jpg",
+     "c": "Who Posted What: enter the keyword and the UID in the Location field",
+     "data": ""
+    },
+    {
+     "f": "facebook-4.jpg",
+     "c": "Red flags: Wayback, the account URL, and Page transparency history",
+     "data": ""
+    },
+    {
+     "f": "mapping-1.jpg",
+     "c": "Practise it: the same claim through Google, Facebook, Who Posted What and Sowsearch",
      "data": ""
     }
    ],
    "notes": [
     "The Instagram location-by-date feature on whopostedwhat was removed in May 2021 when Facebook disabled the underlying parameter. For Instagram, use section 08.",
     "Both tools are volunteer-run and break whenever Meta changes its URL scheme. If one fails, try the other before assuming the content doesn't exist.",
-    "For sustained research, Meta Content Library offers formal access for approved researchers — worth applying for if this becomes routine work."
+    "For sustained research, Meta Content Library offers formal access for approved researchers — worth applying for if this becomes routine work.",
+    "Imposter check: run the Page through the Wayback Machine, read the account URL, and open <b>Page transparency<\/b> → history to see when the name last changed."
    ],
    "links": [
     [
@@ -952,7 +1110,14 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
    ],
    "tags": "facebook whopostedwhat sowsearch graph.tips uid date search",
    "family": "global",
-   "short": "WhoPostedWhat"
+   "short": "WhoPostedWhat",
+   "shotmap": {
+    "0": 0,
+    "4": 2,
+    "8": 1,
+    "9": 4,
+    "11": 3
+   }
   },
   {
    "id": "instagram",
@@ -972,7 +1137,7 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
    ],
    "steps": [
     {
-     "t": "Find the location ID. The easiest route: find any post from the place, tap the blue location name above the image, and read the ID out of the URL.",
+     "t": "Find the location ID — tap the blue location name above any post from the place and read the ID out of the URL, or open instagram.com/explore/locations and let the browser hand you to the app.",
      "c": "https://www.instagram.com/explore/locations/95099702/mgm-grand-las-vegas/"
     },
     {
@@ -998,20 +1163,31 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
    ],
    "images": [
     {
-     "f": "08-instagram-location.webp",
-     "c": "AFP workshop slide (p. 13): Instagram location pages as a lead for nearby public posts.",
+     "f": "instagram-1.jpg",
+     "c": "Instagram: 3 billion users, and search options keep shrinking",
      "data": ""
     },
     {
-     "f": "08-instagram-location-id.webp",
-     "c": "AFP workshop slide (p. 13): mobile Instagram location search and nearby place suggestions.",
+     "f": "instagram-2.jpg",
+     "c": "instagram.com/explore/locations — pick a city, then a place",
+     "data": ""
+    },
+    {
+     "f": "instagram-3.jpg",
+     "c": "On mobile the browser hands you to the app's location page",
+     "data": ""
+    },
+    {
+     "f": "instagram-4.jpg",
+     "c": "site:instagram.com plus a Tools time range beats the native search",
      "data": ""
     }
    ],
    "notes": [
     "Large venues have several overlapping location tags — check the neighbours as well as the obvious one.",
     "Instagram tags are picked from a list by the poster; someone can tag a place from anywhere in the world. It's a lead, never a location proof.",
-    "Use a research account. Viewing a story from your work account tells the poster you were there."
+    "Use a research account. Viewing a story from your work account tells the poster you were there.",
+    "No space after the colon: <span class='inline'>site:instagram.com<\/span>, then set a time range under Tools. A Google search with operators consistently beats Instagram's own."
    ],
    "links": [
     [
@@ -1021,7 +1197,13 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
    ],
    "tags": "instagram location explore locations tags recent geotag",
    "family": "global",
-   "short": "Location pages"
+   "short": "Location pages",
+   "shotmap": {
+    "0": 0,
+    "1": 2,
+    "2": 3,
+    "3": 1
+   }
   },
   {
    "id": "threads",
@@ -1060,17 +1242,28 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
     },
     {
      "t": "Archive posts on sight. Threads posts are deleted as readily as any other."
+    },
+    {
+     "t": "Save a search as a feed, similar to an X list — but you have no control over which accounts appear in it."
+    },
+    {
+     "t": "Users can also select or add <b>topics<\/b> to post under. They surface in your feed, but finding a specific topic takes some searching."
     }
    ],
    "images": [
     {
-     "f": "09-threads-recent.webp",
-     "c": "AFP workshop slide (p. 15): Threads keyword results and the limits of account-level search.",
+     "f": "threads-1.jpg",
+     "c": "Threads: 400m users, strongest in Taiwan, Hong Kong and Macau",
      "data": ""
     },
     {
-     "f": "09-threads-google.webp",
-     "c": "AFP workshop slide (p. 15): topic-based discovery on Threads, with precision caveats.",
+     "f": "threads-2.jpg",
+     "c": "Saved searches become a feed — but you can't choose who appears in it",
+     "data": ""
+    },
+    {
+     "f": "threads-3.jpg",
+     "c": "Users pick topics to post under. Finding them takes some searching",
      "data": ""
     }
    ],
@@ -1086,7 +1279,12 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
    ],
    "tags": "threads search recent filter site: google instagram",
    "family": "global",
-   "short": "Search"
+   "short": "Search",
+   "shotmap": {
+    "0": 0,
+    "7": 1,
+    "8": 2
+   }
   },
   {
    "id": "telegram-search",
@@ -1110,7 +1308,7 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
      "c": "https://xtea.io/ts_en.html"
     },
     {
-     "t": "Run the same query against a second and third index — coverage differs enough that this is not optional.",
+     "t": "Run the same query against a second and third index. <b>Intelx.io<\/b> does the same job and covers other platforms too — select Telegram under Tools. Coverage differs enough that this is not optional.",
      "c": "tgstat.com/en/search · lyzem.com · telemetr.me"
     },
     {
@@ -1155,13 +1353,13 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
    ],
    "images": [
     {
-     "f": "10-xtea-search.webp",
-     "c": "AFP workshop slide (p. 16): xtea.io as a discovery route for public Telegram channels.",
+     "f": "telegram-search-1.jpg",
+     "c": "Telegram: over 1bn users, far less searchable than open networks",
      "data": ""
     },
     {
-     "f": "10-telegram-web-preview.webp",
-     "c": "AFP workshop slide (p. 17): Telegram Desktop search across public channels.",
+     "f": "telegram-search-2.jpg",
+     "c": "Intelx.io does the same job, and covers other platforms too",
      "data": ""
     }
    ],
@@ -1182,7 +1380,11 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
    ],
    "tags": "telegram xtea tgstat lyzem channel search t.me index",
    "family": "msg",
-   "short": "Channel indexes"
+   "short": "Channel indexes",
+   "shotmap": {
+    "0": 0,
+    "2": 1
+   }
   },
   {
    "id": "telegram-desktop",
@@ -1196,7 +1398,7 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
     "Original files, with metadata intact, when the sender uploaded them as documents"
    ],
    "no": [
-    "Metadata from anything sent as a photo — Telegram strips and re-encodes it",
+    "Deleted messages, which vanish for everyone",
     "Edit history of a message; you only see the current version",
     "Deleted messages, which vanish for everyone"
    ],
@@ -1211,7 +1413,7 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
      "t": "Use the calendar icon to <b>jump to a date<\/b> — this is the closest thing to date-bounded search, and it's exact. Pick the day of the incident and read forward."
     },
     {
-     "t": "To keep the original file: if the sender posted it as a <b>file/document<\/b>, right-click → Save As gives you the untouched original, metadata included. If it was sent as a photo or video, Telegram already compressed it and the metadata is gone."
+     "t": "To keep the original file: right-click the media and Save As. <b>Unlike other platforms, Telegram does not strip metadata from photos and videos<\/b> — so what you save usually still carries the capture time, device and sometimes GPS."
     },
     {
      "t": "Run the saved file through a metadata reader — see section 16 — and check whether anything survived: capture time, device, GPS, editing software."
@@ -1222,6 +1424,12 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
     },
     {
      "t": "Follow the forward chain backwards. Each forwarded message names its source channel — keep clicking back until you reach a channel that posted it natively."
+    },
+    {
+     "t": "Turn on the translate button in Settings → Language, then right-click any message and choose Translate."
+    },
+    {
+     "t": "Archive a whole channel: the three dots → Export chat history, as human-readable HTML or machine-readable JSON, with photos and videos."
     }
    ],
    "ops": [
@@ -1244,24 +1452,41 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
    ],
    "images": [
     {
-     "f": "11-telegram-filters.webp",
-     "c": "AFP workshop slide (p. 17): search and translation features in Telegram Desktop.",
+     "f": "telegram-desktop-1.jpg",
+     "c": "Read public channels without joining. Learn the slang: c0vid, sh0t, 💉",
      "data": ""
     },
     {
-     "f": "11-telegram-jump-date.webp",
-     "c": "AFP workshop slide (p. 18): exporting channel material from Telegram Desktop.",
+     "f": "telegram-desktop-2.jpg",
+     "c": "Turn on the translate button, then right-click any message",
+     "data": ""
+    },
+    {
+     "f": "telegram-desktop-3.jpg",
+     "c": "Export chat history as HTML or JSON, with photos and videos",
+     "data": ""
+    },
+    {
+     "f": "telegram-desktop-4.jpg",
+     "c": "Telegram does not strip metadata — check it with the InVID plugin",
      "data": ""
     }
    ],
    "notes": [
     "A file sent as a document keeps its metadata; the same file sent as a photo does not. Always check whether both versions were posted.",
     "The forwarded-from label can be removed by the sender's privacy settings, so an absent chain doesn't mean it's original.",
-    "Don't upload source-identifying material to a web metadata service. Install ExifTool and run it locally for anything sensitive."
+    "Don't upload source-identifying material to a web metadata service. Install ExifTool and run it locally for anything sensitive.",
+    "Learn the slang before you search. Moderated words get respelled — <span class='inline'>c0vid<\/span>, <span class='inline'>sh0t<\/span>, <span class='inline'>vaxines<\/span> — and emojis stand in for whole terms."
    ],
    "tags": "telegram desktop search filters jump to date metadata exif forwarded document",
    "family": "msg",
-   "short": "Desktop + metadata"
+   "short": "Desktop + metadata",
+   "shotmap": {
+    "0": 0,
+    "4": 3,
+    "8": 1,
+    "9": 2
+   }
   },
   {
    "id": "tiktok",
@@ -1281,6 +1506,9 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
    ],
    "steps": [
     {
+     "t": "Read what every post already shows you: the <b>date<\/b>, the <b>caption<\/b>, the <b>hashtags<\/b>, and the <b>sound<\/b>. Those four are on screen before you open a single tool."
+    },
+    {
      "t": "Search on the web at tiktok.com/search?q= and use the filter panel: <b>Date posted<\/b> (yesterday, this week, this month, last 3/6 months) and <b>Sort by<\/b> (relevance or like count). These are coarse but they're what exists."
     },
     {
@@ -1298,14 +1526,20 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
      "t": "Compare that timestamp against the event it claims to show. A video uploaded before the incident is the fastest debunk available on this platform."
     },
     {
-     "t": "Map the spread: search the hashtag, note the earliest uploads, and check whether several accounts posted the same clip within minutes of each other — that pattern is coordination, not virality."
+     "t": "Map the spread with <b>TikTok Creative Center<\/b>, which tracks what is trending by country: search the hashtag, note the earliest uploads, and check whether several accounts posted the same clip within minutes of each other."
     },
     {
-     "t": "For structured collection across a hashtag, use Bellingcat's tiktok-hashtag-analysis to archive posts and metadata in bulk.",
+     "t": "Open the analytics page for a hashtag for post and view counts over time, plus the most popular videos carrying it and a link straight through to them. For bulk collection, Bellingcat's tiktok-hashtag-analysis archives posts and metadata.",
      "c": "https://github.com/bellingcat/tiktok-hashtag-analysis"
     },
     {
      "t": "Take keyframes from the video and reverse-image-search them (13, 14) — most 'TikTok footage' turns out to be re-uploaded from somewhere else."
+    },
+    {
+     "t": "Read the sound credit under the caption. <b>原声<\/b> or the poster's own name means the audio is original to that video; a borrowed track usually means the clip is not."
+    },
+    {
+     "t": "For an account rather than a video, Omar-Thing's User Finder returns the region it is based in, the follower count and the creation date."
     }
    ],
    "ops": [
@@ -1328,20 +1562,36 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
    ],
    "images": [
     {
-     "f": "12-tiktok-filters.webp",
-     "c": "AFP workshop slide (p. 19): TikTok search clues such as date, caption, tags and sound.",
+     "f": "tiktok-1.jpg",
+     "c": "Four things every video carries: date, caption, tags, sound",
      "data": ""
     },
     {
-     "f": "12-bellingcat-timestamp.webp",
-     "c": "AFP workshop slide (p. 19): decoding a TikTok upload time with a timestamp tool.",
+     "f": "tiktok-2.jpg",
+     "c": "No exact upload time on TikTok — the Bellingcat tool decodes it",
+     "data": ""
+    },
+    {
+     "f": "tiktok-3.jpg",
+     "c": "TikTok Creative Center: what is trending, by country",
+     "data": ""
+    },
+    {
+     "f": "tiktok-4.jpg",
+     "c": "Per-hashtag analytics, with the most popular videos carrying it",
+     "data": ""
+    },
+    {
+     "f": "tiktok-5.jpg",
+     "c": "Omar-Thing's User Finder: region, nickname, followers, creation date",
      "data": ""
     }
    ],
    "notes": [
     "The timestamp tool is client-side maths on the video ID, not a lookup — it can't be spoofed by the uploader and it works on deleted videos.",
     "Upload time is not filming time. It proves the video existed by then, nothing more.",
-    "Download videos with a tool that preserves the file rather than screen-recording, so keyframe searching stays usable."
+    "Download videos with a tool that preserves the file rather than screen-recording, so keyframe searching stays usable.",
+    "TikTok Creative Center tracks trending hashtags by country, with per-hashtag analytics and the videos carrying them — useful for spotting a coordinated push."
    ],
    "links": [
     [
@@ -1355,7 +1605,14 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
    ],
    "tags": "tiktok bellingcat timestamp video id hashtag analysis search filters",
    "family": "global",
-   "short": "Timestamp tool"
+   "short": "Timestamp tool",
+   "shotmap": {
+    "1": 0,
+    "4": 1,
+    "7": 2,
+    "8": 3,
+    "11": 4
+   }
   },
   {
    "id": "reverse-image",
@@ -1397,6 +1654,10 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
      "t": "If all four come back empty, change the image: flip it horizontally, crop differently, adjust contrast, or re-upload a screenshot of it. Re-run the promising engines."
     },
     {
+     "t": "For Chinese material, add two more: <b>360识图<\/b> (image.so.com, also st.so.com) and <b>搜狗识图<\/b> (pic.sogou.com). Both index parts of the Chinese web that Baidu misses.",
+     "c": "https://image.so.com"
+    },
+    {
      "t": "For video, pull keyframes first — the InVID plugin does this in one click (14) — and search each keyframe separately."
     },
     {
@@ -1423,20 +1684,37 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
    ],
    "images": [
     {
-     "f": "13-lens-about-this-image.webp",
-     "c": "AFP workshop slide (p. 22): reverse-image engines to run in parallel.",
+     "f": "reverse-image-1.jpg",
+     "c": "以图搜图 — six engines, and you run more than one",
      "data": ""
     },
     {
-     "f": "13-tineye-oldest.webp",
-     "c": "AFP workshop slide (p. 22): Yandex as a strong option for faces and visual similarity.",
+     "f": "reverse-image-2.jpg",
+     "c": "Yandex: identical and similar faces, and easy on mobile",
+     "data": ""
+    },
+    {
+     "f": "reverse-image-3.jpg",
+     "c": "Chinese engines: 360识图 (image.so.com) and 搜狗 (pic.sogou.com)",
+     "data": ""
+    },
+    {
+     "f": "reverse-image-4.jpg",
+     "c": "No result? Low resolution, flipped, or edited will do that",
+     "data": ""
+    },
+    {
+     "f": "reverse-image-5.jpg",
+     "c": "Blur or crop away the distracting part and search again",
      "data": ""
     }
    ],
    "notes": [
     "Different engines, different answers, by design. Run all four before drawing a conclusion; treat any single engine's silence as meaningless.",
     "An earliest-indexed date is not a capture date. It's an upper bound: the photo existed by then.",
-    "Uploading an image sends it to that company. For unpublished material from a source, crop out identifying detail or don't upload it at all."
+    "Uploading an image sends it to that company. For unpublished material from a source, crop out identifying detail or don't upload it at all.",
+    "Bing and Yandex both have built-in cropping. For Chinese material also try 360识图 (image.so.com) and 搜狗识图 (pic.sogou.com).",
+    "If nothing comes back, the image is probably low-resolution, flipped or edited. Blur or crop away the distracting part — a person, a watermark — and search what remains."
    ],
    "links": [
     [
@@ -1458,7 +1736,14 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
    ],
    "tags": "reverse image search google lens tineye yandex baidu shitu crop oldest",
    "family": "forensic",
-   "short": "Four engines"
+   "short": "Four engines",
+   "shotmap": {
+    "0": 0,
+    "1": 4,
+    "4": 1,
+    "6": 3,
+    "7": 2
+   }
   },
   {
    "id": "invid",
@@ -1522,13 +1807,8 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
    ],
    "images": [
     {
-     "f": "14-invid-toolbar.webp",
-     "c": "AFP workshop slide (p. 25): the InVID verification plugin as a browser-based toolbox.",
-     "data": ""
-    },
-    {
-     "f": "14-invid-keyframes.webp",
-     "c": "AFP workshop slide (p. 32): extracting file metadata through InVID or Metadata2Go.",
+     "f": "invid-1.jpg",
+     "c": "The Verification Plugin — desktop only, and the whole toolbox in one menu",
      "data": ""
     }
    ],
@@ -1549,7 +1829,10 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
    ],
    "tags": "invid weverify veraai plugin keyframes forensic ocr magnifier deepfake archive",
    "family": "forensic",
-   "short": "InVID plugin"
+   "short": "InVID plugin",
+   "shotmap": {
+    "0": 0
+   }
   },
   {
    "id": "mapping",
@@ -1620,18 +1903,6 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
      "Sun position by date, time and coordinates"
     ]
    ],
-   "images": [
-    {
-     "f": "15-google-earth-historical.webp",
-     "c": "AFP workshop example (p. 7): start location work from a platform map, then corroborate it.",
-     "data": ""
-    },
-    {
-     "f": "15-amap-streetview.webp",
-     "c": "AFP workshop example (p. 13): nearby-place results are leads, not proof of location.",
-     "data": ""
-    }
-   ],
    "notes": [
     "<b>Coordinate systems differ.<\/b> Chinese map providers use offset systems — GCJ-02 for AMAP, BD-09 for Baidu — while Google Earth, GPS and EXIF use WGS-84. The same point can appear several hundred metres apart between providers. Convert before comparing, and never quote a Chinese-map coordinate as a GPS coordinate.",
     "Satellite imagery dates are shown in Google Earth Pro's status bar. Always record which capture date you used.",
@@ -1653,7 +1924,9 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
    ],
    "tags": "geolocation chronolocation google earth street view yandex amap 高德 baidu maps suncalc gcj-02",
    "family": "forensic",
-   "short": "Geolocation"
+   "short": "Geolocation",
+   "images": [],
+   "shotmap": {}
   },
   {
    "id": "metadata",
@@ -1694,6 +1967,9 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
     {
      "t": "For anything sensitive, install <b>ExifTool<\/b> and run it locally instead. Uploading a source's unpublished file to a third-party website is a security decision, and usually the wrong one.",
      "c": "exiftool -a -G1 -s photo.jpg"
+    },
+    {
+     "t": "Receiving on WeChat: choose <b>Save to Files<\/b>, never Save Image. Save Image strips everything."
     }
    ],
    "ops": [
@@ -1712,20 +1988,31 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
    ],
    "images": [
     {
-     "f": "16-metadata2go-exif.webp",
-     "c": "AFP workshop slide (p. 30): what metadata may reveal about a file and its capture device.",
+     "f": "metadata-1.jpg",
+     "c": "Metadata: device, settings, date and time, sometimes coordinates",
      "data": ""
     },
     {
-     "f": "16-metadata2go-gps.webp",
-     "c": "AFP workshop slide (p. 32): metadata fields to check, including GPS date, latitude and longitude.",
+     "f": "metadata-2.jpg",
+     "c": "It can be edited. Never use it as sole proof — cross-check it",
+     "data": ""
+    },
+    {
+     "f": "metadata-3.jpg",
+     "c": "On WeChat, choose Save to Files — Save Image strips the metadata",
+     "data": ""
+    },
+    {
+     "f": "metadata-4.jpg",
+     "c": "Metadata2Go: gps_date_time, gps_latitude, gps_longitude",
      "data": ""
     }
    ],
    "notes": [
     "Facebook, Instagram, X, WhatsApp, WeChat, Weibo and Telegram (photo mode) all strip EXIF on upload. If you're reading metadata from a social download, you're reading the platform's, not the camera's.",
     "Every field can be edited with the same tools that read it. Metadata supports a timeline, it never establishes one on its own.",
-    "Screenshots have their own metadata — of the screenshotting device, not the original photo. Don't confuse the two."
+    "Screenshots have their own metadata — of the screenshotting device, not the original photo. Don't confuse the two.",
+    "Ask sources to send the original by email, Telegram, WeTransfer, or as a document on WhatsApp/WeChat. Anything sent as a photo arrives re-encoded."
    ],
    "links": [
     [
@@ -1739,7 +2026,13 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
    ],
    "tags": "metadata exif metadata2go exiftool gps datetimeoriginal stripped",
    "family": "forensic",
-   "short": "Metadata2Go"
+   "short": "Metadata2Go",
+   "shotmap": {
+    "0": 0,
+    "2": 3,
+    "8": 2,
+    "10": 1
+   }
   },
   {
    "id": "ai-detection",
@@ -1767,7 +2060,13 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
      "c": "https://deepmind.google/synthid"
     },
     {
+     "t": "The InVID plugin reads C2PA manifests too: Image → Provenance (C2PA) shows the issuer, the date issued, capture information and the edit history."
+    },
+    {
      "t": "For images with no credentials, run the <b>Hive AI Detector<\/b> Chrome extension: right-click an image on any page and it returns a likelihood that it's AI-generated, with a breakdown by generator family."
+    },
+    {
+     "t": "Or upload the file to Gemini and put <span class='inline'>@verifyai<\/span> in your prompt — the same SynthID check, with an explanation attached."
     },
     {
      "t": "For video and audio, use <b>Deepfake-o-meter<\/b> from the University at Buffalo. Free account, and it runs several independent open-source detectors on the same file — the disagreement between models is the useful signal, not the average.",
@@ -1780,7 +2079,16 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
      "t": "Record every score with the tool name, version and date. These models change, and a number without its source is worthless three months later."
     },
     {
+     "t": "Look at the picture itself. The errors persist: distorted faces, extra fingers or limbs, objects blending into one another, signage that means nothing — and in longer video, continuity breaks between shots."
+    },
+    {
      "t": "<b>Then verify by other means.<\/b> Reverse-search keyframes (13), check the upload timestamp (12), geolocate the background (15), and contact the person who posted it. A detector score never goes to air on its own."
+    },
+    {
+     "t": "Hiya finds cloned text-to-speech, not human mimicry or post-processed edits — and shorter clips score more precisely, from two seconds up to five minutes."
+    },
+    {
+     "t": "Re-test your tools before you teach them. Several of these started free and moved behind a paywall, some disappeared, and all of them change what they can do from one month to the next."
     }
    ],
    "ops": [
@@ -1811,13 +2119,63 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
    ],
    "images": [
     {
-     "f": "17-c2pa-verify.webp",
-     "c": "AFP workshop slide (p. 35): C2PA content credentials for provenance and edit history.",
+     "f": "ai-detection-1.jpg",
+     "c": "Four moves: detection tools, clues, the source, other sources",
      "data": ""
     },
     {
-     "f": "17-deepfake-o-meter.webp",
-     "c": "AFP workshop slide (p. 37): Deepfake-o-meter as one probabilistic detector among several.",
+     "f": "ai-detection-2.jpg",
+     "c": "Hive returns a probability, across text, image, video and audio",
+     "data": ""
+    },
+    {
+     "f": "ai-detection-3.jpg",
+     "c": "SynthID reads Google's invisible watermark, even after edits",
+     "data": ""
+    },
+    {
+     "f": "ai-detection-4.jpg",
+     "c": "Or upload to Gemini and put @verifyai in the prompt",
+     "data": ""
+    },
+    {
+     "f": "ai-detection-5.jpg",
+     "c": "C2PA Content Credentials — the provenance standard AFP helped launch",
+     "data": ""
+    },
+    {
+     "f": "ai-detection-6.jpg",
+     "c": "Reading a C2PA manifest inside the InVID plugin",
+     "data": ""
+    },
+    {
+     "f": "ai-detection-7.jpg",
+     "c": "Deepfake-o-Meter: pick your detectors, then compare them",
+     "data": ""
+    },
+    {
+     "f": "ai-detection-8.jpg",
+     "c": "For audio: Hiya on Chrome, Hiya inside InVID, or Deepfake-Total",
+     "data": ""
+    },
+    {
+     "f": "ai-detection-9.jpg",
+     "c": "Hiya finds cloned speech — not human mimicry. Short clips are sharper",
+     "data": ""
+    },
+    {
+     "f": "ai-detection-10.jpg",
+     "c": "Split the audio from the video and test them separately",
+     "data": ""
+    },
+    {
+     "f": "ai-detection-11.jpg",
+     "c": "Look for the errors that persist: hands, logos, illegible text",
+     "data": ""
+    },
+    {
+     "f": "ai-detection-12.jpg",
+     "c": "Free today, paywalled tomorrow. Nothing here is a fixed answer",
      "data": ""
     }
    ],
@@ -1825,7 +2183,11 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
     "<b>Absence proves nothing.<\/b> Screenshotting, re-uploading, cropping and messaging apps all strip C2PA credentials, and SynthID only covers participating generators. 'No watermark found' is not 'not AI'.",
     "Detector accuracy falls sharply on the compressed, re-encoded video that social platforms actually serve. Test the tools on known-real footage from the same platform so you know their baseline.",
     "Never publish a percentage as a finding. Report what you did, what each tool returned, and what independent evidence you obtained.",
-    "SynthID has been shown to be reverse-engineerable, so a present watermark is strong evidence and an absent one is no evidence at all."
+    "SynthID has been shown to be reverse-engineerable, so a present watermark is strong evidence and an absent one is no evidence at all.",
+    "Also: upload to Gemini and put <span class='inline'>@verifyai<\/span> in the prompt for Google-made media; OpenAI runs its own verifier at openai.com/research/verify; deepfake-total.com covers audio.",
+    "Separate the audio from the video and test each independently — the picture is often real and the voice is not. Run each detector several times, on different sections, using the highest-quality file you have.",
+    "Look for what still goes wrong: distorted faces, extra fingers, objects blending into each other, illegible signage, and continuity breaks in longer clips.",
+    "Many of these tools are free today and paywalled tomorrow, and some facial-recognition services have opaque ownership — PimEyes among them. Check what a tool is before you feed it a source's face."
    ],
    "links": [
     [
@@ -1843,7 +2205,21 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
    ],
    "tags": "ai detection hive synthid c2pa content credentials deepfake-o-meter hiya voice watermark provenance",
    "family": "forensic",
-   "short": "AI + provenance"
+   "short": "AI + provenance",
+   "shotmap": {
+    "0": 0,
+    "1": 4,
+    "2": 2,
+    "3": 5,
+    "4": 1,
+    "5": 3,
+    "6": 6,
+    "7": 7,
+    "9": 10,
+    "11": 8,
+    "12": 11,
+    "14": 9
+   }
   }
  ],
  "routes": [
@@ -1944,320 +2320,167 @@ body{background:radial-gradient(circle at 58% 23%,rgba(204,191,255,.55),transpar
  ]
 }</script>
 <script>
-/* ================================================================
-   DATA
-   ================================================================ */
-const DATA = JSON.parse(document.getElementById("data").textContent);
-const TOOLS = DATA.sections;
-const FAM = {global:"Global platforms", china:"Chinese platforms", open:"Open web", msg:"Messaging", forensic:"Media & location"};
-const FAMORDER = ["global","china","open","msg","forensic"];
-
-/* ================================================================
-   ART — schematic plates, one line weight throughout
-   ================================================================ */
-const S = (b) => '<svg viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">'+b+'</svg>';
-const ART = {
-  twoframes: S('<rect x="14" y="26" width="52" height="42"/><rect x="54" y="52" width="52" height="42" stroke-dasharray="3 4"/><path d="M22 78h26M22 86h16"/><circle cx="80" cy="73" r="9"/><path d="M80 68v5l3 3"/>'),
-  crop:      S('<rect x="20" y="24" width="80" height="60" opacity=".35"/><path d="M44 40v-8h8M84 40v-8h-8M44 68v8h8M84 68v8h-8"/><rect x="44" y="32" width="40" height="44" stroke-width="1.8"/><circle cx="64" cy="54" r="6"/>'),
-  fan:       S('<circle cx="60" cy="30" r="7"/><path d="M60 37v14M60 51H22v12M60 51h38v12M60 51v12"/><rect x="12" y="63" width="20" height="16"/><rect x="40" y="63" width="20" height="16"/><rect x="68" y="63" width="20" height="16"/><rect x="96" y="63" width="12" height="16"/>'),
-  timeline:  S('<path d="M14 60h92"/><path d="M28 52v16M52 55v10M76 55v10M100 55v10"/><circle cx="28" cy="60" r="6" stroke-width="1.9"/><path d="M20 82h20" stroke-width="1.9"/><path d="M24 34l4 4 4-4"/><path d="M28 24v14"/>'),
-  empty:     S('<circle cx="60" cy="58" r="30" stroke-dasharray="4 5"/><path d="M40 38l40 40"/><path d="M60 96v6M46 96l-2 6M74 96l2 6"/>'),
-  log:       S('<rect x="24" y="18" width="72" height="86"/><path d="M36 38h34M36 52h48M36 66h40M36 80h28"/><path d="M74 84l6 6 12-14" stroke-width="1.9"/>'),
-  scanframe: S('<rect x="16" y="28" width="88" height="60"/><circle cx="36" cy="48" r="4"/><circle cx="70" cy="42" r="4"/><circle cx="52" cy="70" r="4"/><circle cx="88" cy="66" r="4"/><path d="M36 48l34-6M52 70l18-28M52 70l36-4" stroke-dasharray="2 4"/>'),
-  intersect: S('<circle cx="46" cy="58" r="26"/><circle cx="74" cy="58" r="26"/><path d="M60 36v44" opacity=".4"/><circle cx="60" cy="58" r="5" stroke-width="1.9"/>'),
-  sun:       S('<circle cx="46" cy="40" r="12"/><path d="M46 20v-6M46 66v6M26 40h-6M72 40h6M32 26l-4-4M60 26l4-4"/><path d="M84 92H36"/><path d="M84 92V62" stroke-width="1.9"/><path d="M84 92l-30-8" stroke-dasharray="3 4"/>'),
-  offset:    S('<path d="M40 84c0 0-14-16-14-26a14 14 0 1128 0c0 10-14 26-14 26z"/><circle cx="40" cy="57" r="5"/><path d="M84 92c0 0-14-16-14-26a14 14 0 1128 0c0 10-14 26-14 26z" stroke-dasharray="3 4"/><path d="M50 40h26" stroke-width="1.6"/><path d="M70 34l7 6-7 6"/>'),
-  maps:      S('<path d="M14 34l28-10 36 12 28-10v62l-28 10-36-12-28 10z"/><path d="M42 24v62M78 36v62" stroke-dasharray="3 4"/><circle cx="60" cy="56" r="5" stroke-width="1.9"/>'),
-  pincheck:  S('<path d="M60 100c0 0-26-30-26-48a26 26 0 1152 0c0 18-26 48-26 48z"/><path d="M48 51l9 9 17-18" stroke-width="1.9"/>'),
-  fork:      S('<path d="M60 100V70"/><path d="M60 70L30 40M60 70l30-30"/><circle cx="30" cy="32" r="9" stroke-width="1.8"/><path d="M26 32l3 3 5-6" stroke-width="1.7"/><circle cx="90" cy="32" r="9" stroke-dasharray="3 3"/><path d="M87 29l6 6M93 29l-6 6"/>'),
-  filetags:  S('<path d="M32 14h38l18 18v74H32z"/><path d="M70 14v18h18"/><path d="M44 52h30M44 66h30M44 80h18"/><circle cx="82" cy="80" r="4"/>'),
-  stripped:  S('<path d="M32 14h38l18 18v74H32z"/><path d="M70 14v18h18"/><path d="M44 52h30M44 66h30M44 80h18" stroke-dasharray="3 5" opacity=".55"/><path d="M28 96L92 26" stroke-width="1.7"/>'),
-  gauge:     S('<path d="M22 78a38 38 0 1176 0"/><path d="M60 78L40 52" stroke-width="1.9"/><circle cx="60" cy="78" r="4" stroke-width="1.9"/><path d="M22 78h-6M98 78h6M60 40v-6"/>'),
-  globe:     S('<circle cx="60" cy="58" r="34"/><path d="M60 24c-12 10-12 58 0 68M60 24c12 10 12 58 0 68M26 58h68M31 40h58M31 76h58" opacity=".75"/>'),
-  method:    S('<path d="M28 96l6-18L82 30l12 12-48 48z"/><path d="M76 36l12 12"/><path d="M28 96l14-4"/><path d="M20 24h30M20 34h20"/>'),
-  message:   S('<path d="M20 26h80v52H56L36 96V78H20z"/><path d="M34 44h52M34 58h36"/>'),
-  clockid:   S('<circle cx="60" cy="56" r="28"/><path d="M60 38v18l12 8" stroke-width="1.8"/><path d="M18 96h84" opacity=".5"/><path d="M26 92v8M42 92v8M58 92v8M74 92v8M90 92v8" opacity=".5"/>'),
-  stamp:     S('<rect x="20" y="66" width="80" height="16"/><path d="M40 66V50a20 20 0 1140 0v16" opacity=".5"/><path d="M46 34l8 8 18-18" stroke-width="2" opacity="0"/><circle cx="60" cy="42" r="20"/><path d="M50 42l7 7 14-15" stroke-width="1.9"/>'),
-  /* tool glyphs */
-  g_search:  S('<circle cx="52" cy="52" r="26"/><path d="M72 72l24 24"/><path d="M40 52h24M52 40v24" opacity=".6"/>'),
-  g_list:    S('<rect x="20" y="24" width="80" height="72"/><path d="M34 44h20M34 60h44M34 76h32"/><circle cx="26" cy="44" r="2.5"/><circle cx="26" cy="60" r="2.5"/><circle cx="26" cy="76" r="2.5"/>'),
-  g_dork:    S('<rect x="16" y="34" width="88" height="24" rx="2"/><path d="M28 46h30"/><path d="M16 72h50M16 84h34" opacity=".7"/><path d="M84 70l8 8-8 8"/>'),
-  g_cn:      S('<circle cx="60" cy="58" r="30"/><path d="M60 28v60M30 58h60" opacity=".6"/><path d="M46 44h28M46 72h28" opacity=".4"/><path d="M92 90l14 14"/>'),
-  g_pin:     S('<path d="M60 100c0 0-24-28-24-46a24 24 0 1148 0c0 18-24 46-24 46z"/><circle cx="60" cy="54" r="8"/>'),
-  g_video:   S('<rect x="18" y="34" width="60" height="48" rx="2"/><path d="M78 52l24-14v44L78 68z"/><path d="M40 50l16 8-16 8z"/>'),
-  g_chat:    S('<path d="M18 28h84v46H50L30 90V74H18z"/><path d="M46 68l40-30" stroke-width="1.7"/>'),
-  g_grid:    S('<rect x="20" y="20" width="34" height="34"/><rect x="66" y="20" width="34" height="34"/><rect x="20" y="66" width="34" height="34"/><rect x="66" y="66" width="34" height="34" stroke-dasharray="3 4"/>'),
-  g_plug:    S('<rect x="34" y="40" width="52" height="52" rx="3"/><path d="M48 40V22M72 40V22"/><path d="M48 60h24M48 74h16"/>'),
-  g_map:     S('<path d="M16 36l30-12 28 12 30-12v58l-30 12-28-12-30 12z"/><circle cx="60" cy="52" r="6"/>'),
-  g_file:    S('<path d="M34 16h36l18 18v70H34z"/><path d="M70 16v18h18"/><path d="M46 56h30M46 70h30M46 84h16"/>'),
-  g_shield:  S('<path d="M60 14l34 12v34c0 24-16 38-34 46-18-8-34-22-34-46V26z"/><path d="M46 58l10 10 20-22" stroke-width="1.8"/>')
+const DATA=JSON.parse(document.getElementById("data").textContent);
+const TOOLS=DATA.sections;
+const FAM={global:"Global platforms",china:"Chinese platforms",open:"Open web",msg:"Messaging",forensic:"Media & location"};
+const FAMORDER=["global","china","open","msg","forensic"];
+const S=b=>'<svg viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">'+b+'</svg>';
+const ART={
+ twoframes:S('<rect x="14" y="26" width="52" height="42" rx="4"/><rect x="54" y="52" width="52" height="42" rx="4" stroke-dasharray="3 4"/><circle cx="80" cy="73" r="9"/><path d="M80 68v5l3 3"/>'),
+ crop:S('<rect x="20" y="24" width="80" height="60" rx="4" opacity=".3"/><path d="M44 40v-8h8M84 40v-8h-8M44 68v8h8M84 68v8h-8"/><rect x="44" y="32" width="40" height="44" rx="2" stroke-width="1.9"/>'),
+ fan:S('<circle cx="60" cy="30" r="7"/><path d="M60 37v14M60 51H22v12M60 51h38v12M60 51v12"/><rect x="12" y="63" width="20" height="16" rx="3"/><rect x="40" y="63" width="20" height="16" rx="3"/><rect x="68" y="63" width="20" height="16" rx="3"/><rect x="96" y="63" width="12" height="16" rx="3"/>'),
+ timeline:S('<path d="M14 60h92"/><path d="M28 52v16M52 55v10M76 55v10M100 55v10"/><circle cx="28" cy="60" r="6" stroke-width="2"/>'),
+ empty:S('<circle cx="60" cy="58" r="30" stroke-dasharray="4 5"/><path d="M40 38l40 40"/>'),
+ log:S('<rect x="24" y="18" width="72" height="86" rx="6"/><path d="M36 38h34M36 52h48M36 66h40M36 80h28"/><path d="M74 84l6 6 12-14" stroke-width="2"/>'),
+ scanframe:S('<rect x="16" y="28" width="88" height="60" rx="5"/><circle cx="36" cy="48" r="4"/><circle cx="70" cy="42" r="4"/><circle cx="52" cy="70" r="4"/><circle cx="88" cy="66" r="4"/><path d="M36 48l34-6M52 70l18-28M52 70l36-4" stroke-dasharray="2 4"/>'),
+ intersect:S('<circle cx="46" cy="58" r="26"/><circle cx="74" cy="58" r="26"/><circle cx="60" cy="58" r="5" stroke-width="2"/>'),
+ sun:S('<circle cx="46" cy="40" r="12"/><path d="M46 20v-6M46 66v6M26 40h-6M72 40h6M32 26l-4-4M60 26l4-4"/><path d="M84 92H36"/><path d="M84 92V62" stroke-width="2"/><path d="M84 92l-30-8" stroke-dasharray="3 4"/>'),
+ offset:S('<path d="M40 84s-14-16-14-26a14 14 0 1128 0c0 10-14 26-14 26z"/><circle cx="40" cy="57" r="5"/><path d="M84 92s-14-16-14-26a14 14 0 1128 0c0 10-14 26-14 26z" stroke-dasharray="3 4"/><path d="M50 40h26M70 34l7 6-7 6"/>'),
+ maps:S('<path d="M14 34l28-10 36 12 28-10v62l-28 10-36-12-28 10z"/><path d="M42 24v62M78 36v62" stroke-dasharray="3 4"/><circle cx="60" cy="56" r="5" stroke-width="2"/>'),
+ pincheck:S('<path d="M60 100s-26-30-26-48a26 26 0 1152 0c0 18-26 48-26 48z"/><path d="M48 51l9 9 17-18" stroke-width="2"/>'),
+ fork:S('<path d="M60 100V70M60 70L30 40M60 70l30-30"/><circle cx="30" cy="32" r="9" stroke-width="1.9"/><path d="M26 32l3 3 5-6" stroke-width="1.8"/><circle cx="90" cy="32" r="9" stroke-dasharray="3 3"/><path d="M87 29l6 6M93 29l-6 6"/>'),
+ filetags:S('<path d="M32 14h38l18 18v74H32z" rx="4"/><path d="M70 14v18h18M44 52h30M44 66h30M44 80h18"/>'),
+ stripped:S('<path d="M32 14h38l18 18v74H32z"/><path d="M70 14v18h18"/><path d="M44 52h30M44 66h30M44 80h18" stroke-dasharray="3 5" opacity=".5"/><path d="M28 96L92 26" stroke-width="1.8"/>'),
+ gauge:S('<path d="M22 78a38 38 0 1176 0"/><path d="M60 78L40 52" stroke-width="2"/><circle cx="60" cy="78" r="4" stroke-width="2"/>'),
+ globe:S('<circle cx="60" cy="58" r="34"/><path d="M60 24c-12 10-12 58 0 68M60 24c12 10 12 58 0 68M26 58h68M31 40h58M31 76h58" opacity=".7"/>'),
+ method:S('<path d="M28 96l6-18L82 30l12 12-48 48z"/><path d="M76 36l12 12M28 96l14-4M20 24h30M20 34h20"/>'),
+ message:S('<path d="M20 26h80v52H56L36 96V78H20z" rx="6"/><path d="M34 44h52M34 58h36"/>'),
+ clockid:S('<circle cx="60" cy="56" r="28"/><path d="M60 38v18l12 8" stroke-width="1.9"/><path d="M18 96h84" opacity=".4"/>'),
+ stamp:S('<rect x="20" y="66" width="80" height="16" rx="4"/><circle cx="60" cy="42" r="20"/><path d="M50 42l7 7 14-15" stroke-width="2"/>'),
+ g_search:S('<circle cx="52" cy="52" r="26"/><path d="M72 72l24 24"/>'),
+ g_list:S('<rect x="20" y="24" width="80" height="72" rx="6"/><path d="M34 44h20M34 60h44M34 76h32"/>'),
+ g_dork:S('<rect x="16" y="34" width="88" height="24" rx="12"/><path d="M28 46h30M16 72h50M16 84h34" opacity=".7"/>'),
+ g_cn:S('<circle cx="60" cy="58" r="30"/><path d="M60 28v60M30 58h60" opacity=".6"/><path d="M92 90l14 14"/>'),
+ g_pin:S('<path d="M60 100s-24-28-24-46a24 24 0 1148 0c0 18-24 46-24 46z"/><circle cx="60" cy="54" r="8"/>'),
+ g_video:S('<rect x="18" y="34" width="60" height="48" rx="6"/><path d="M78 52l24-14v44L78 68z"/><path d="M40 50l16 8-16 8z"/>'),
+ g_chat:S('<path d="M18 28h84v46H50L30 90V74H18z" rx="8"/><path d="M46 68l40-30" stroke-width="1.8"/>'),
+ g_grid:S('<rect x="20" y="20" width="34" height="34" rx="5"/><rect x="66" y="20" width="34" height="34" rx="5"/><rect x="20" y="66" width="34" height="34" rx="5"/><rect x="66" y="66" width="34" height="34" rx="5" stroke-dasharray="3 4"/>'),
+ g_plug:S('<rect x="34" y="40" width="52" height="52" rx="8"/><path d="M48 40V22M72 40V22M48 60h24M48 74h16"/>'),
+ g_map:S('<path d="M16 36l30-12 28 12 30-12v58l-30 12-28-12-30 12z"/><circle cx="60" cy="52" r="6"/>'),
+ g_file:S('<path d="M34 16h36l18 18v70H34z"/><path d="M70 16v18h18M46 56h30M46 70h30M46 84h16"/>'),
+ g_shield:S('<path d="M60 14l34 12v34c0 24-16 38-34 46-18-8-34-22-34-46V26z"/><path d="M46 58l10 10 20-22" stroke-width="1.9"/>')
 };
-const TOOLART = {"x-operators":"g_search","x-lists":"g_list","google-operators":"g_dork","baidu":"g_cn","weibo":"g_pin",
+const TOOLART={"x-operators":"g_search","x-lists":"g_list","google-operators":"g_dork","baidu":"g_cn","weibo":"g_pin",
  "wechat":"g_video","facebook":"g_search","instagram":"g_pin","threads":"g_chat","telegram-search":"g_grid",
  "telegram-desktop":"g_chat","tiktok":"clockid","reverse-image":"g_search","invid":"g_plug","mapping":"g_map",
  "metadata":"g_file","ai-detection":"g_shield"};
 
-/* ================================================================
-   ROOMS — hand-written, one idea per plate
-   ================================================================ */
-const ROOMS = {
-  img:{ name:"Room I · The image", art:"twoframes", door:"Has this picture been online before?", steps:[
-    {art:"twoframes", eye:"Room I · The image", head:"Most breaking images are <em>old</em> images.",
-     line:"Before anything else, ask whether this picture has been online before.",
-     more:["This is the cheapest check available and it settles more claims than every other tool combined.","It costs about ninety seconds. Do it before you tell anyone the clip exists."]},
-    {art:"crop", head:"Crop to one detail.",
-     line:"A whole frame returns lookalikes. One distinctive detail returns the source.",
-     demo:"crop",
-     more:["Good crops: a shopfront sign, a shoulder patch, an unusual roofline, a vehicle livery.","Bad crops: sky, faces in a crowd, anything generic enough to exist in a thousand photos."]},
-    {art:"fan", head:"Ask all four.",
-     line:"They index different parts of the web and disagree constantly. That is the point.",
-     demo:"engines",
-     more:["<b>Lens</b> — widest index, and About this image gives a first-seen date.","<b>TinEye</b> — exact copies, sortable by oldest.","<b>Yandex</b> — faces, buildings, landscapes.","<b>Baidu 识图</b> — the Chinese web. Non-optional for a China claim."]},
-    {art:"timeline", head:"Sort by <em>oldest</em>.",
-     line:"That date is an upper bound: the image existed by then. Not when it was taken.",
-     more:["Open the oldest hit and read its caption. The original context is usually the story.","On Lens, About this image gives Google's own first-seen date and any content credentials."]},
-    {art:"empty", head:"Empty is not <em>original</em>.",
-     line:"It means no engine has indexed a copy. Change the image and ask again.",
-     more:["Flip it horizontally. Crop somewhere else. Raise the contrast. Screenshot it and search the screenshot.","For video, pull keyframes first and search each one separately."]},
-    {art:"log", head:"Write down the negative.",
-     line:"“Four engines, cropped on the signage, no earlier match, 5 Aug” is a finding.",
-     acts:[["Every reverse-search detail","#tool/reverse-image"]],
-     more:["An unrecorded search is a search you will repeat in six months.","Record which engines, which crop, and the date you looked."]}
-  ]},
+const ROOMS={"img": {"name": "Room I · The image", "steps": [{"art": "twoframes", "eye": "Room I · The image", "head": "Most breaking images are <em>old</em> images.", "line": "Before anything else, ask whether this picture has been online before.", "shot": {"f": "images/room-img-1.jpg", "c": "Old image? Ask why it is being shared now"}, "more": ["This is the cheapest check you have, and it settles more claims than every other tool combined.", "Clips with the highest view counts are usually not the original upload."]}, {"art": "crop", "head": "Crop to one detail.", "line": "A whole frame returns lookalikes. One distinctive detail returns the source.", "demo": "crop", "shot": {"f": "images/room-img-2.jpg", "c": "Blur or crop away the rest, then search the detail"}, "more": ["Blur or crop away whatever dominates the frame — a person, a watermark — and search what is left.", "Bing and Yandex have cropping built in. A screenshot of the region often works better than the file."]}, {"art": "fan", "head": "Ask all four.", "line": "They index different halves of the web and disagree constantly. That is the point.", "demo": "engines", "shot": {"f": "images/room-img-3.jpg", "c": "Six engines. They index different halves of the web"}, "more": ["<b>Lens</b> — widest index, reads text, and you can add a keyword to the image search.", "<b>TinEye</b> — sort by oldest; it tells you when the photo first appeared.", "<b>Yandex</b> — identical and similar faces, and easy on mobile.", "<b>Baidu</b> — images from Chinese sites, and it will name a public figure."]}, {"art": "timeline", "head": "Two more for the <em>Chinese</em> web.", "line": "360识图 at image.so.com, and 搜狗识图 at pic.sogou.com. Both find what Baidu misses.", "shot": {"f": "images/room-img-4.jpg", "c": "And two more, if the claim is Chinese"}, "more": ["Open the oldest hit you find and read its caption. The original context is usually the story.", "An earliest-indexed date is an upper bound: the image existed by then, not that it was taken then."]}, {"art": "empty", "head": "Empty is not <em>original</em>.", "line": "Low resolution, a flip, or an edit will all return nothing.", "shot": {"f": "images/room-img-5.jpg", "c": "Flipped, low-res or edited images return nothing"}, "more": ["Flip it horizontally. Crop somewhere else. Raise the contrast. Search a screenshot of it.", "For video, pull keyframes first and search each one separately."]}, {"art": "log", "head": "Then talk to the person.", "line": "Analyse the account first: who is it, and what did they post before this?", "shot": {"f": "images/room-img-6.jpg", "c": "Keep in mind: save the conversation, it can be deleted"}, "acts": [["Every reverse-search detail", "#tool/reverse-image"]], "more": ["Be empathetic, and never encourage a witness to put themselves at risk.", "Save the conversation — it can be deleted.", "Ask for the original file, not a re-share. That is where the metadata is."]}]}, "geo": {"name": "Room II · The place", "steps": [{"art": "scanframe", "eye": "Room II · The place", "head": "Ask four questions first.", "line": "When, where, in what language, and on which network will the results be?", "demo": "inventory", "shot": {"f": "images/room-geo-1.jpg", "c": "Ask first: when, where, in what language, on which network"}, "more": ["Witnesses rarely write like journalists. Most will name a street or a town, not a precise location."]}, {"art": "message", "head": "They won't name the <em>place</em>.", "line": "Witnesses type fast, often in shock. Most give you a town or a street, not a location.", "shot": {"f": "images/room-geo-2.jpg", "c": "Witnesses don't write like journalists. They name a street, not a place"}, "more": ["Search the street name plus the town before anything else — it frequently lands the spot outright.", "Breaking events elsewhere take a while to reach your algorithm. Search hashtags in the local language."]}, {"art": "intersect", "head": "One is a coincidence.", "line": "Five independent features pointing the same way is a geolocation.", "more": ["Search the text you found first — a shop name plus a city often lands it before you open a map.", "Confirm on satellite, then at street level, then on a second provider."]}, {"art": "sun", "head": "Shadows give you the <em>time</em>.", "line": "If you know where, the shadow direction tells you when. Test the claimed hour.", "demo": "sun", "more": ["Google Maps: layers → satellite → drag the yellow figure to a blue street for more capture dates.", "百度地图 has 全景图 and a time machine; right-click a point to search hotels and cafés nearby."]}, {"art": "offset", "head": "Chinese maps are <em>offset</em>.", "line": "By law. AMAP uses GCJ-02, Baidu BD-09, while GPS and EXIF use WGS-84.", "demo": "coords", "more": ["Drop a raw GPS pin on Baidu and you land on the wrong building — often over a kilometre out.", "Never quote a Baidu or AMAP coordinate as a GPS coordinate."]}, {"art": "maps", "head": "Never trust one map.", "line": "Imagery dates differ between providers. Confirm on a second before you commit.", "acts": [["Google Earth", "https://earth.google.com"], ["Yandex", "https://yandex.com/maps"], ["AMAP", "https://www.amap.com"], ["Baidu", "https://map.baidu.com"]], "more": ["AMAP is better on mobile and carries user-uploaded detail Google and Baidu do not.", "In China, property listings and VR 看房 tours are an unexpected source of interior and street views.", "Live cams — geological and meteorological agencies — can confirm conditions at a time."]}, {"art": "pincheck", "head": "Show your working.", "line": "List the matched features with a screenshot each. The pylon, the kerb, the sign.", "acts": [["Every mapping detail", "#tool/mapping"]]}]}, "ai": {"name": "Room III · The file", "steps": [{"art": "fork", "eye": "Room III · The file", "head": "Provenance before <em>detection</em>.", "line": "One reads a signature a real tool left behind. The other is a guess.", "shot": {"f": "images/room-ai-1.jpg", "c": "Provenance: who made it, and what edited it"}, "more": ["<b>Provenance</b> — C2PA Content Credentials and SynthID watermarks. Present and validating is strong evidence.", "<b>Detection</b> — Hive, Deepfake-o-Meter. A probability from pixel statistics. Triage, never evidence."]}, {"art": "filetags", "head": "Read the file where it sits.", "line": "Metadata and credentials, parsed on your device. Nothing is uploaded.", "demo": "inspect", "shot": {"f": "images/room-ai-2.jpg", "c": "What a file carries, when nothing has stripped it"}, "more": ["Ask for the original by email, Telegram, WeTransfer, or as a document. On WeChat use Save to Files, never Save Image.", "Telegram is the exception among messengers — it does not strip metadata."]}, {"art": "stripped", "head": "It can be <em>edited</em>.", "line": "Metadata is never sole proof. Use it to cross-check something else.", "shot": {"f": "images/room-ai-3.jpg", "c": "And why it is never sole proof"}, "more": ["Absence proves nothing either: screenshots and re-uploads strip credentials and EXIF.", "A file with no metadata is the normal case for anything off a social platform."]}, {"art": "gauge", "head": "A score is not a finding.", "line": "Drag it. The honest sentence barely changes between thirty and ninety.", "demo": "score", "shot": {"f": "images/room-ai-4.jpg", "c": "A probability score. Unreliable, with false positives"}, "more": ["Split the audio from the video and test each separately — the picture is often real and the voice is not.", "Run each detector several times, on different sections, using the highest-quality file you have."]}, {"art": "globe", "head": "Check the account too.", "line": "Has the name changed since it was created? Wayback, the URL, and Page transparency.", "demo": "domain", "shot": {"f": "images/room-ai-5.jpg", "c": "Imposter accounts: check when the name last changed"}, "more": ["A site registered three weeks ago claiming a decade of history is the story.", "For groups and pages, the history section shows every rename."]}, {"art": "method", "head": "Publish the method.", "line": "What you did, what each tool returned, what you confirmed independently.", "shot": {"f": "images/room-ai-6.jpg", "c": "Detection tools, clues, the source, other sources — then you write it up"}, "acts": [["Every AI and provenance tool", "#tool/ai-detection"]], "more": ["Never publish the percentage as a finding.", "Cross-check with reliable sources, look for witnesses at other angles and timestamps, and talk to experts."]}]}, "case": {"name": "Room IV · The case", "steps": [{"art": "message", "eye": "Room IV · A worked case", "head": "08:14. A clip arrives.", "line": "“昨晚新山大水灾” — flooding in Johor Bahru last night. Your producer wants it at ten.", "demo": "brief", "shot": {"f": "images/room-case-1.jpg", "c": "What you have to establish: not recycled, really this event, and who shared it"}, "more": ["<b>Training scenario.</b> The incident is invented so you can practise the sequence. The tools and the arithmetic are real."]}, {"art": "clockid", "head": "Cheapest check first.", "line": "A TikTok video ID carries its own upload time. Decode it before anything else.", "demo": "tiktok", "shot": {"f": "images/room-case-2.jpg", "c": "TikTok hides the exact upload time. The tool decodes it"}, "more": ["Works on deleted videos, as long as you kept the URL.", "Upload time is not filming time — but against “last night”, it is usually enough."]}, {"art": "timeline", "head": "Then find where it lived.", "line": "Keyframes, cropped tight, through four engines. TinEye oldest: November 2021.", "demo": "q3", "shot": {"f": "images/room-case-3.jpg", "c": "Keyframes, cropped, through every engine"}}, {"art": "scanframe", "head": "Is it even Johor?", "line": "Six observations. Tap the ones that contradict the claim.", "demo": "features"}, {"art": "gauge", "head": "The AI check adds nothing.", "line": "No EXIF, no credentials, detector 41%. All expected. All inconclusive.", "demo": "q5"}, {"art": "stamp", "head": "False.", "line": "Footage from a 2021 flood elsewhere, recirculated as last night in Johor Bahru.", "demo": "verdict", "shot": {"f": "images/room-case-6.jpg", "c": "An AFP fact-check, with the verdict on the front of it"}, "more": ["Not “AI-generated” — nothing supports that.", "Not “filmed in November 2021” — you know when it was uploaded, not shot.", "Name the sender only if there is a public-interest reason."]}, {"art": "log", "head": "You built this as you went.", "line": "The artefact your editor asks for, and the one you need when the clip returns.", "demo": "log", "more": ["<b>Cheapest check first.</b> Timestamp, then reverse image, then location. Detectors last.", "<b>Stop when it is settled.</b> The later steps corroborate; they do not decide.", "<b>Record the negatives.</b> “Inconclusive” belongs in the log precisely because it changed nothing."]}]}};
+const DOORS=[["img","Room I","The image","Has this picture been online before?"],
+ ["geo","Room II","The place","Is it where they say it is?"],
+ ["ai","Room III","The file","Was any of this made by a machine?"],
+ ["case","Room IV","The case","What does the whole sequence look like?"]];
 
-  geo:{ name:"Room II · The place", art:"maps", door:"Is it where they say it is?", steps:[
-    {art:"scanframe", eye:"Room II · The place", head:"Read the frame before the map.",
-     line:"Every feature you name is a constraint. Constraints intersect fast.",
-     demo:"inventory"},
-    {art:"intersect", head:"One is a coincidence.",
-     line:"Five independent features pointing the same way is a geolocation.",
-     more:["Search the text first — a shop name plus a city often lands it before you open any map.","Confirm on satellite, then again at street level, then on a second provider."]},
-    {art:"sun", head:"Shadows give you the <em>time</em>.",
-     line:"If you know where, the shadow direction tells you when. Test the claimed hour.",
-     demo:"sun",
-     more:["A shadow falling the wrong way rules out the claimed time outright.","Below the horizon means any daylight shadow in the picture is impossible."]},
-    {art:"offset", head:"Chinese maps are <em>offset</em>.",
-     line:"By law. AMAP uses GCJ-02, Baidu BD-09, while GPS and EXIF use WGS-84.",
-     demo:"coords",
-     more:["Drop a raw GPS pin on Baidu and you land on the wrong building — often over a kilometre out.","Never quote a Baidu or AMAP coordinate as a GPS coordinate. Convert, and say which system you cite."]},
-    {art:"maps", head:"Never trust one map.",
-     line:"Imagery dates differ between providers. Confirm on a second before you commit.",
-     acts:[["Google Earth","https://earth.google.com"],["Yandex","https://yandex.com/maps"],["AMAP","https://www.amap.com"],["Baidu","https://map.baidu.com"]],
-     more:["<b>Google Earth Pro</b> — historical imagery slider dates construction and damage.","<b>Street View</b> — eye level, with a time slider for earlier captures.","<b>Yandex</b> — Russia, Central Asia, the Caucasus.","<b>AMAP and Baidu</b> — mainland China. Cross-check one against the other."]},
-    {art:"pincheck", head:"Show your working.",
-     line:"List the matched features with a screenshot each. The pylon, the kerb, the sign.",
-     acts:[["Every mapping detail","#tool/mapping"]]}
-  ]},
-
-  ai:{ name:"Room III · The file", art:"fork", door:"Was any of this made by a machine?", steps:[
-    {art:"fork", eye:"Room III · The file", head:"Provenance before <em>detection</em>.",
-     line:"One reads a signature a real tool left behind. The other is a guess.",
-     more:["<b>Provenance</b> — C2PA credentials and SynthID watermarks. Present and validating is strong evidence.","<b>Detection</b> — Hive, Deepfake-o-meter. A probability from pixel statistics. Useful for triage, never evidence."]},
-    {art:"filetags", head:"Read the file where it sits.",
-     line:"Metadata and credentials, parsed on your device. Nothing is uploaded.",
-     demo:"inspect",
-     more:["This matters when the file came from a source. Sending it to a web service is a security decision.","For anything sensitive, install ExifTool and work locally."]},
-    {art:"stripped", head:"Absence proves <em>nothing</em>.",
-     line:"Screenshots, re-uploads and every messaging app strip credentials and EXIF.",
-     more:["A file with no metadata is the normal case for anything off a social platform.","No watermark found is not the same as not AI. Say the first, never the second."]},
-    {art:"gauge", head:"A score is not a finding.",
-     line:"Drag it. The honest sentence barely changes between thirty and ninety.",
-     demo:"score"},
-    {art:"globe", head:"Check the masthead too.",
-     line:"A site registered three weeks ago claiming a decade of history is the story.",
-     demo:"domain",
-     more:["Read them in order: registration date, first archive capture, certificates, who links to it.","No named humans on the About page? Reverse-search the portraits in Room I."]},
-    {art:"method", head:"Publish the method.",
-     line:"What you did, what each tool returned, what you confirmed independently.",
-     acts:[["Every AI and provenance tool","#tool/ai-detection"]],
-     more:["Never publish the percentage as a finding.","Two independent detectors plus provenance agreeing is something. One number is not."]}
-  ]},
-
-  "case":{ name:"Room IV · The case", art:"stamp", door:"What does the whole sequence look like?", steps:[
-    {art:"message", eye:"Room IV · A worked case", head:"08:14. A clip arrives.",
-     line:"“昨晚新山大水灾” — flooding in Johor Bahru last night. Your producer wants it at ten.",
-     demo:"brief",
-     more:["<b>Training scenario.</b> The incident is invented so you can practise the sequence. The tools and the arithmetic are real."]},
-    {art:"clockid", head:"Cheapest check first.",
-     line:"A TikTok video ID carries its own upload time. Decode it before anything else.",
-     demo:"tiktok",
-     more:["Works on deleted videos, as long as you kept the URL.","Upload time is not filming time — but against “last night”, it is usually enough."]},
-    {art:"timeline", head:"Then find where it lived.",
-     line:"Keyframes, cropped tight, through four engines. TinEye oldest: November 2021.",
-     demo:"q3"},
-    {art:"scanframe", head:"Is it even Johor?",
-     line:"Six observations. Tap the ones that contradict the claim.",
-     demo:"features"},
-    {art:"gauge", head:"The AI check adds nothing.",
-     line:"No EXIF, no credentials, detector 41%. All expected. All inconclusive.",
-     demo:"q5",
-     more:["You still run it, because the first question in the newsroom will be “could it be AI?”","A logged inconclusive check answers that in one line."]},
-    {art:"stamp", head:"False.",
-     line:"Footage from a 2021 flood elsewhere, recirculated as last night in Johor Bahru.",
-     demo:"verdict",
-     more:["Not “AI-generated” — nothing supports that.","Not “filmed in November 2021” — you know when it was uploaded, not shot.","Name the sender only if there is a public-interest reason."]},
-    {art:"log", head:"You built this as you went.",
-     line:"The artefact your editor asks for, and the one you need when the clip returns.",
-     demo:"log",
-     more:["<b>Cheapest check first.</b> Timestamp, then reverse image, then location. Detectors last.","<b>Stop when it is settled.</b> The later steps corroborate; they do not decide.","<b>Record the negatives.</b> “Inconclusive” belongs in the log precisely because it changed nothing."]}
-  ]}
-};
-const DOORS = [
-  ["img","I","The image", ROOMS.img.door, "twoframes"],
-  ["geo","II","The place", ROOMS.geo.door, "maps"],
-  ["ai","III","The file", ROOMS.ai.door, "fork"],
-  ["case","IV","The case", ROOMS["case"].door, "stamp"],
-  ["index","·","The full index","All seventeen tools, in reference form.","g_list"]
-];
-
-/* ================================================================
-   ENGINE
-   ================================================================ */
 let view="hall", room=null, step=0, seq=[], editing=false, dirHandle=null, dirty=false, selfHash=false;
 function setHash(h){ selfHash=true; location.hash=h; setTimeout(function(){selfHash=false;},0); }
-const $ = id => document.getElementById(id);
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
+const attr=s=>esc(s).replace(/"/g,"&quot;");
+function get(p){ return p.split(".").reduce((o,k)=>o==null?o:o[k],DATA); }
+function setV(p,v){ const ks=p.split("."),l=ks.pop(); ks.reduce((a,k)=>a[k],DATA)[l]=v; }
+function show(v){ view=v; ["hall","stage","index"].forEach(k=>$("v-"+k).classList.toggle("on",k===v)); }
+function lead(html){ const t=html.replace(/<[^>]+>/g,""); const m=t.match(/^(.{20,150}?[.!?])(\s|$)/); return m?m[1]:(t.length>150?t.slice(0,140)+"…":t); }
+function rest(html){ const t=html.replace(/<[^>]+>/g,""), l=lead(html); const r=t.slice(l.length).trim(); return r?[r]:[]; }
+function shotOf(t,i){ const im=(t.images||[])[i]; return im?{f:"images/"+im.f,c:im.c}:null; }
 
-function show(v){
-  view=v;
-  ["v-hall","v-stage","v-index"].forEach(id=>$(id).classList.toggle("on", id==="v-"+v));
-}
-function firstSentence(html){
-  const t=html.replace(/<[^>]+>/g,"");
-  const m=t.match(/^(.{20,150}?[.!?])(\s|$)/);
-  return m ? m[1] : (t.length>150 ? t.slice(0,140)+"…" : t);
-}
-function restAfterLead(html){
-  const t=html.replace(/<[^>]+>/g,""); const lead=firstSentence(html);
-  const rest=t.slice(lead.length).trim();
-  return rest ? [rest] : [];
-}
-
-/* build the step sequence for a tool from stored data */
 function toolSeq(t){
-  const glyph = TOOLART[t.id] || "g_search";
-  const out=[];
-  out.push({art:glyph, eye:t.num+" · "+t.platform, head:t.title.split("—")[0].trim(),
-    line:firstSentence(t.purpose), badges:[...(t.yes||[]).slice(0,2).map(x=>["can",x]), ...(t.no||[]).slice(0,2).map(x=>["cant",x])],
-    more:[...restAfterLead(t.purpose)], bind:{line:null}});
-  if(t.images && t.images[0] && t.images[0].f){
-    out.push({art:glyph, eye:"AFP workshop example", head:"See the interface in context.",
-      line:t.images[0].c, image:t.images[0]});
-  }
-  (t.steps||[]).forEach((st,i)=>{
-    out.push({art:glyph, eye:"Step "+String(i+1).padStart(2,"0")+" of "+String(t.steps.length).padStart(2,"0"),
-      head:null, lead:firstSentence(st.t), rest:restAfterLead(st.t), full:st.t, code:st.c,
-      bind:{full:"sections."+TOOLS.indexOf(t)+".steps."+i+".t"}});
-  });
-  if(t.ops && t.ops.length) out.push({art:"g_dork", eye:"Reference", head:"Copy what you need.",
-    line:"Tap any line to copy it.", ops:t.ops});
-  if(t.notes && t.notes.length) out.push({art:"stripped", eye:"Before you rely on this", head:"Watch out.",
-    line:null, more:t.notes, openMore:true});
-  if(t.links && t.links.length) out.push({art:glyph, eye:"Open it", head:"Go and use it.",
-    line:null, acts:t.links.map(l=>[l[0],l[1]])});
+  const g=TOOLART[t.id]||"g_search", ti=TOOLS.indexOf(t), out=[];
+  out.push({art:g, eye:t.num+" · "+t.platform, head:t.title.split("—")[0].trim(), line:lead(t.purpose),
+    badges:[...(t.yes||[]).slice(0,2).map(x=>["can",x]),...(t.no||[]).slice(0,2).map(x=>["cant",x])], more:rest(t.purpose)});
+  (t.steps||[]).forEach((st,i)=>out.push({art:g, eye:"Step "+String(i+1).padStart(2,"0")+" / "+String(t.steps.length).padStart(2,"0"),
+    lead:lead(st.t), rest:rest(st.t), full:st.t, code:st.c, bind:"sections."+ti+".steps."+i+".t"}));
+  if(t.ops&&t.ops.length) out.push({art:"g_dork", eye:"Reference", head:"Copy what you need.", line:"Tap a line to copy it.", ops:t.ops});
+  if(t.notes&&t.notes.length) out.push({art:"stripped", eye:"Before you rely on this", head:"Watch out.", more:t.notes, openMore:true});
+  if(t.links&&t.links.length) out.push({art:g, eye:"Open it", head:"Go and use it.", acts:t.links.map(l=>[l[0],l[1]])});
+  const map=t.shotmap||{};
+  Object.keys(map).forEach(k=>{ const i=+k, sh=shotOf(t,map[k]); if(out[i]&&sh) out[i].shot=sh; });
   return out;
 }
-
 function openRoom(key){
   if(key==="index"){ renderIndex(); show("index"); setHash("#index"); return; }
   if(key.indexOf("tool/")===0){
     const t=TOOLS.find(x=>x.id===key.slice(5)); if(!t) return;
-    room={name:t.num+" · "+t.title.split("—")[0].trim(), key:key}; seq=toolSeq(t);
-  } else {
-    const r=ROOMS[key]; if(!r) return;
-    room={name:r.name, key:key}; seq=r.steps;
-  }
-  step=0; show("stage"); paint(); setHash("#"+(room.key.indexOf("tool/")===0?room.key:"room/"+room.key));
-  $("s-hint").classList.add("on"); setTimeout(()=>$("s-hint").classList.remove("on"),2600);
+    room={name:t.num+" · "+t.title.split("—")[0].trim(),key:key}; seq=toolSeq(t);
+  } else { const r=ROOMS[key]; if(!r) return; room={name:r.name,key:key}; seq=r.steps; }
+  step=0; show("stage"); paint(); setHash("#"+(key.indexOf("tool/")===0?key:"room/"+key));
 }
-
 function paint(){
   const s=seq[step];
   $("s-name").textContent=room.name;
-  $("s-of").textContent=String(step+1).padStart(2,"0")+" / "+String(seq.length).padStart(2,"0");
+  $("s-count").textContent=String(step+1).padStart(2,"0")+" / "+String(seq.length).padStart(2,"0");
   $("s-ticks").innerHTML=seq.map((_,i)=>'<button class="tick '+(i<step?"done":i===step?"now":"")+'" data-go="'+i+'" aria-label="Step '+(i+1)+'"></button>').join("");
   $("s-prev").disabled=step===0; $("s-next").disabled=step===seq.length-1;
-
-  let h='<div class="plate">'+(ART[s.art]||ART.g_search)+'</div>';
-  h+='<p class="eyebrow">'+(s.eye||room.name)+'</p>';
+  let h='<div class="panel">';
+  if(s.shot) h+='<figure class="shot"><img src="'+attr(s.shot.f)+'" alt="'+attr(s.shot.c)+'" loading="lazy"><figcaption>'+esc(s.shot.c)+'</figcaption></figure>';
+  else h+='<div class="glyph">'+(ART[s.art]||ART.g_search)+'</div>';
+  h+='<div class="body"><p class="eyebrow">'+esc(s.eye||room.name)+'</p>';
   if(s.head) h+='<h2 class="head">'+s.head+'</h2>';
   if(s.full!==undefined){
-    if(editing) h+='<p class="line" data-b="'+s.bind.full+'">'+s.full+'</p>';
+    if(editing) h+='<p class="line" data-b="'+s.bind+'">'+s.full+'</p>';
     else h+='<p class="line">'+s.lead+'</p>';
-  }
-  else if(s.line) h+='<p class="line">'+s.line+'</p>';
-  if(s.code) h+='<div class="acts"><button class="act copy" data-copy="'+String(s.code).replace(/"/g,"&quot;")+'"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="12" height="12"/><path d="M5 15V3h12"/></svg><span class="mono" style="font-family:var(--mono);font-size:12.5px">'+String(s.code).replace(/</g,"&lt;")+'</span></button></div>';
-  if(s.badges && s.badges.length) h+='<div class="badges">'+s.badges.map(b=>'<span class="badge '+b[0]+'">'+b[1].replace(/<[^>]+>/g,"")+'</span>').join("")+'</div>';
-  if(s.image) h+='<figure class="tool-shot"><img src="images/'+String(s.image.f).replace(/"/g,"&quot;")+'" alt="'+String(s.image.c||"").replace(/"/g,"&quot;")+'"><figcaption>'+String(s.image.c||"")+'</figcaption></figure>';
-  if(s.ops) h+='<div class="demo wide"><div class="taps">'+s.ops.map(o=>'<button class="tap copy" data-copy="'+String(o[0]).replace(/"/g,"&quot;")+'"><span class="bx">✓</span><span><span style="font-family:var(--mono);font-size:12.5px;color:var(--brass)">'+String(o[0]).replace(/</g,"&lt;")+'</span><br>'+o[1]+'</span></button>').join("")+'</div></div>';
+  } else if(s.line) h+='<p class="line">'+s.line+'</p>';
+  if(s.code) h+='<button class="code copy" data-copy="'+attr(s.code)+'">'+esc(s.code)+'</button>';
+  if(s.badges&&s.badges.length) h+='<div class="badges">'+s.badges.map(b=>'<span class="badge '+b[0]+'">'+esc(b[1].replace(/<[^>]+>/g,""))+'</span>').join("")+'</div>';
+  if(s.ops) h+='<div class="demo"><div class="taps">'+s.ops.map(o=>'<button class="tap copy" data-copy="'+attr(o[0])+'"><span class="bx">✓</span><span><span style="font-family:var(--mono);font-size:12.5px;color:var(--violet)">'+esc(o[0])+'</span><br>'+o[1]+'</span></button>').join("")+'</div></div>';
   if(s.demo) h+='<div id="demoslot"></div>';
-  if(s.acts) h+='<div class="acts">'+s.acts.map(a=>{
-    const ext=a[1].indexOf("http")===0;
-    return '<a class="act'+(ext?"":" key")+'" href="'+a[1]+'"'+(ext?' target="_blank" rel="noopener"':'')+'>'+a[0]+(ext?' ↗':' →')+'</a>';
-  }).join("")+'</div>';
-  const extra = (s.more||[]).concat(!editing && s.rest ? s.rest : []);
+  if(s.acts) h+='<div class="acts">'+s.acts.map(a=>{const e=a[1].indexOf("http")===0;
+    return '<a class="act'+(e?"":" key")+'" href="'+attr(a[1])+'"'+(e?' target="_blank" rel="noopener"':'')+'>'+esc(a[0])+(e?' ↗':' →')+'</a>';}).join("")+'</div>';
+  const extra=(s.more||[]).concat(!editing&&s.rest?s.rest:[]);
   if(extra.length) h+='<div class="more'+(s.openMore?" open":"")+'"><button class="more-t">More <svg class="car" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 9l7 7 7-7"/></svg></button><div class="more-b"><ul>'+extra.map(m=>'<li>'+m+'</li>').join("")+'</ul></div></div>';
-
-  const p=$("s-panel"); p.innerHTML=h; $("s-stage").scrollTop=0;
-  if(s.demo && DEMOS[s.demo]) DEMOS[s.demo]($("demoslot"));
+  h+='</div></div>';
+  $("s-panel").innerHTML=h; $("s-panel").parentElement.scrollTop=0;
+  if(s.demo&&DEMOS[s.demo]) DEMOS[s.demo]($("demoslot"));
   applyEdit();
 }
 function go(n){ if(n<0||n>=seq.length) return; step=n; paint(); }
-
-/* nav wiring */
-$("s-prev").onclick=()=>go(step-1);
-$("s-next").onclick=()=>go(step+1);
-$("s-close").onclick=()=>{ show("hall"); setHash(""); };
-$("i-close").onclick=()=>{ show("hall"); setHash(""); };
-$("s-ticks").addEventListener("click",e=>{ const b=e.target.closest("[data-go]"); if(b) go(+b.dataset.go); });
+$("s-prev").onclick=()=>go(step-1); $("s-next").onclick=()=>go(step+1);
+$("s-back").onclick=()=>{ show("hall"); setHash(""); };
+$("i-back").onclick=()=>{ show("hall"); setHash(""); };
+$("s-ticks").addEventListener("click",e=>{const b=e.target.closest("[data-go]"); if(b) go(+b.dataset.go);});
 document.addEventListener("keydown",e=>{
   if(view!=="stage"||e.target.matches("input,textarea,[contenteditable=true]")) return;
   if(e.key==="ArrowRight") go(step+1);
   if(e.key==="ArrowLeft") go(step-1);
-  if(e.key==="Escape") { show("hall"); setHash(""); }
+  if(e.key==="Escape"){ show("hall"); setHash(""); }
 });
-/* swipe */
-(function(){
-  let x0=null,y0=null;
-  const st=$("s-stage");
-  st.addEventListener("touchstart",e=>{ x0=e.touches[0].clientX; y0=e.touches[0].clientY; },{passive:true});
-  st.addEventListener("touchend",e=>{
-    if(x0===null) return;
-    const dx=e.changedTouches[0].clientX-x0, dy=e.changedTouches[0].clientY-y0;
-    if(Math.abs(dx)>60 && Math.abs(dx)>Math.abs(dy)*1.6) go(step + (dx<0?1:-1));
-    x0=null;
-  },{passive:true});
-})();
-/* more + copy (delegated) */
+(function(){let x0=null,y0=null; const el=document.querySelector(".panelwrap");
+ el.addEventListener("touchstart",e=>{x0=e.touches[0].clientX;y0=e.touches[0].clientY;},{passive:true});
+ el.addEventListener("touchend",e=>{ if(x0===null) return;
+  const dx=e.changedTouches[0].clientX-x0, dy=e.changedTouches[0].clientY-y0;
+  if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.6) go(step+(dx<0?1:-1)); x0=null;},{passive:true});})();
 document.addEventListener("click",e=>{
   const m=e.target.closest(".more-t"); if(m){ m.closest(".more").classList.toggle("open"); return; }
-  const c=e.target.closest(".copy"); if(c && !editing){
-    const txt=c.dataset.copy;
-    const flash=()=>{ c.style.borderColor="var(--sage)"; setTimeout(()=>c.style.borderColor="",900); };
-    if(navigator.clipboard) navigator.clipboard.writeText(txt).then(flash).catch(()=>{});
-  }
+  const c=e.target.closest(".copy"); if(c&&!editing){ const t=c.dataset.copy;
+    if(navigator.clipboard) navigator.clipboard.writeText(t).then(()=>{c.classList.add("done");setTimeout(()=>c.classList.remove("done"),1000);}).catch(()=>{}); return; }
+  const d=e.target.closest("[data-room]"); if(d){ openRoom(d.dataset.room); return; }
+  const j=e.target.closest("[data-jump]"); if(j){ j.dataset.jump==="index"?openRoom("index"):(show("hall"),setHash("")); return; }
+  const t2=e.target.closest("[data-tool]"); if(t2){ openRoom("tool/"+t2.dataset.tool); return; }
 });
 
-/* ---------- hall + index ---------- */
-$("doors").innerHTML = DOORS.map(d=>
-  '<button class="door" data-room="'+d[0]+'">'+(ART[d[4]]||"")+
-  '<span><span class="n">'+d[1]+'</span><span class="t">'+d[2]+'</span><span class="d">'+d[3]+'</span></span></button>').join("");
-$("doors").addEventListener("click",e=>{ const b=e.target.closest("[data-room]"); if(b) openRoom(b.dataset.room); });
+/* hall */
+function firstShot(t){ return (t.images&&t.images[0])?"images/"+t.images[0].f:""; }
+function roomShot(k){ const r=ROOMS[k]; const s=(r.steps.find(x=>x.shot)||{}).shot; return s?s.f:""; }
+$("rooms").innerHTML=DOORS.map(d=>'<button class="ritem" data-room="'+d[0]+'"><span><span class="k">'+d[1]+'</span><span class="t">'+d[2]+'</span><span class="d">'+d[3]+'</span></span><img src="'+roomShot(d[0])+'" alt="" loading="lazy"></button>').join("");
+const QUICK=["reverse-image","tiktok","weibo","invid","metadata","ai-detection","telegram-desktop","wechat"];
+$("quick").innerHTML=QUICK.map(id=>{const t=TOOLS.find(x=>x.id===id); if(!t) return "";
+  return '<button class="mini" data-tool="'+t.id+'"><img src="'+firstShot(t)+'" alt="" loading="lazy"><div class="b"><div class="k">'+esc(t.num)+' · '+esc(t.platform)+'</div><div class="t">'+esc(t.title.split("—")[0].trim())+'</div><div class="d">'+esc(t.short||"")+'</div></div></button>';}).join("");
 
-function renderIndex(){
-  let h='<h2>The full index</h2><p class="sub">Seventeen tools. Tap one to walk it step by step.</p>';
-  FAMORDER.forEach(f=>{
-    const list=TOOLS.filter(t=>t.family===f); if(!list.length) return;
-    h+='<p class="fam">'+FAM[f]+'</p><div class="tools">'+list.map(t=>
-      '<button class="tool" data-tool="'+t.id+'">'+(ART[TOOLART[t.id]]||ART.g_search)+
-      '<span><span class="n">'+t.num+'</span><span class="t">'+t.title.split("—")[0].trim()+'</span><span class="p">'+t.platform+'</span></span></button>').join("")+'</div>';
+/* index */
+function renderIndex(f){
+  const q=(f||"").trim().toLowerCase();
+  let h='<div class="idx-h"><h2>All tools</h2><p>Seventeen, grouped by where they work. Tap one to walk it step by step.</p></div>';
+  FAMORDER.forEach(fam=>{
+    const list=TOOLS.filter(t=>t.family===fam&&(!q||(t.title+" "+t.platform+" "+(t.tags||"")+" "+(t.short||"")).toLowerCase().includes(q)));
+    if(!list.length) return;
+    h+='<p class="fam">'+FAM[fam]+'</p><div class="cards">'+list.map(t=>
+      '<button class="mini" data-tool="'+t.id+'"><img src="'+firstShot(t)+'" alt="" loading="lazy"><div class="b"><div class="k">'+esc(t.num)+'</div><div class="t">'+esc(t.title.split("—")[0].trim())+'</div><div class="d">'+esc(t.platform)+'</div></div></button>').join("")+'</div>';
   });
-  h+='<p class="fam">Elsewhere</p><div class="tools"><a class="tool" href="fact-checking-handbook.html">'+ART.g_file+
-     '<span><span class="n">PRINT</span><span class="t">Long-form handbook</span><span class="p">Every caveat, printable</span></span></a></div>';
   $("i-body").innerHTML=h;
 }
-$("i-body").addEventListener("click",e=>{ const b=e.target.closest("[data-tool]"); if(b) openRoom("tool/"+b.dataset.tool); });
+$("q").addEventListener("input",function(){ if(this.value.trim()){ renderIndex(this.value); show("index"); $("q2").value=this.value; } });
+$("q2").addEventListener("input",function(){ renderIndex(this.value); });
 
-/* ---------- hash routing ---------- */
+/* routing */
 function route(){
   const h=location.hash.replace(/^#/,"");
   if(!h){ show("hall"); return; }
@@ -2266,228 +2489,164 @@ function route(){
   if(h.indexOf("tool/")===0){ openRoom(h); return; }
   const t=TOOLS.find(x=>x.id===h); if(t) openRoom("tool/"+t.id);
 }
-window.addEventListener("hashchange",()=>{ if(selfHash) return; route(); });
+window.addEventListener("hashchange",()=>{ if(!selfHash) route(); });
 
-/* ================================================================
-   EDIT + SAVE
-   ================================================================ */
-function get(p){ return p.split(".").reduce((o,k)=>o==null?o:o[k],DATA); }
-function setV(p,v){ const ks=p.split("."),l=ks.pop(); ks.reduce((a,k)=>a[k],DATA)[l]=v; }
+/* edit + save */
 function applyEdit(){
   document.body.classList.toggle("ed",editing);
-  document.querySelectorAll("[data-b]").forEach(el=>{
-    if(editing) el.setAttribute("contenteditable","true"); else el.removeAttribute("contenteditable");
-  });
-  $("s-edit").classList.toggle("act",editing);
+  document.querySelectorAll("[data-b]").forEach(el=>{ editing?el.setAttribute("contenteditable","true"):el.removeAttribute("contenteditable"); });
+  $("s-edit").classList.toggle("on",editing);
 }
-document.addEventListener("input",e=>{
-  const el=e.target.closest("[data-b]"); if(!el||!editing) return;
-  setV(el.dataset.b, el.innerHTML); dirty=true;
-});
+document.addEventListener("input",e=>{ const el=e.target.closest("[data-b]"); if(!el||!editing) return; setV(el.dataset.b, el.innerHTML); dirty=true; });
 $("s-edit").onclick=()=>{ editing=!editing; if(view==="stage") paint(); applyEdit(); };
-function toast(msg){ const t=$("toast"); t.textContent=msg; t.classList.add("on"); setTimeout(()=>t.classList.remove("on"),1800); }
+function toast(m){ const t=$("toast"); t.textContent=m; t.classList.add("on"); setTimeout(()=>t.classList.remove("on"),1700); }
 function serialize(){
-  const json=JSON.stringify(DATA,null,1).replace(/<\//g,"<\\/");
-  $("data").textContent=json;
-  const p=$("s-panel").innerHTML, i=$("i-body").innerHTML, d=$("doors").innerHTML, tk=$("s-ticks").innerHTML;
-  $("s-panel").innerHTML=""; $("i-body").innerHTML=""; $("doors").innerHTML=""; $("s-ticks").innerHTML="";
+  $("data").textContent=JSON.stringify(DATA,null,1).replace(/<\//g,"<\\/");
+  const keep=[$("s-panel").innerHTML,$("i-body").innerHTML,$("s-ticks").innerHTML];
+  $("s-panel").innerHTML=""; $("i-body").innerHTML=""; $("s-ticks").innerHTML="";
   document.querySelectorAll("[contenteditable]").forEach(el=>el.removeAttribute("contenteditable"));
   const cls=document.body.className; document.body.className="";
-  document.querySelectorAll(".view").forEach((v,n)=>v.classList.toggle("on",n===0));
+  document.querySelectorAll(".view").forEach((v,i)=>v.classList.toggle("on",i===0));
   const html="<!DOCTYPE html>\n"+document.documentElement.outerHTML;
   document.body.className=cls;
-  $("s-panel").innerHTML=p; $("i-body").innerHTML=i; $("doors").innerHTML=d; $("s-ticks").innerHTML=tk;
+  $("s-panel").innerHTML=keep[0]; $("i-body").innerHTML=keep[1]; $("s-ticks").innerHTML=keep[2];
   show(view); applyEdit();
   return html;
 }
 async function save(){
   const html=serialize();
-  const fname=(decodeURIComponent(location.pathname.split("/").pop()||"")||"index.html");
-  if(!dirHandle && window.showDirectoryPicker){
-    try{ dirHandle=await window.showDirectoryPicker({mode:"readwrite"}); }catch(err){}
-  }
-  if(dirHandle){
-    try{
-      const fh=await dirHandle.getFileHandle(fname.endsWith(".html")?fname:"index.html",{create:true});
-      const w=await fh.createWritable(); await w.write(html); await w.close();
-      dirty=false; toast("Saved to file"); return;
-    }catch(err){}
-  }
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(new Blob([html],{type:"text/html"}));
-  a.download=fname.endsWith(".html")?fname:"index.html"; a.click();
-  setTimeout(()=>URL.revokeObjectURL(a.href),4000);
-  dirty=false; toast("Downloaded");
+  const fn=(decodeURIComponent(location.pathname.split("/").pop()||"")||"index.html");
+  if(!dirHandle&&window.showDirectoryPicker){ try{ dirHandle=await window.showDirectoryPicker({mode:"readwrite"}); }catch(e){} }
+  if(dirHandle){ try{
+    const fh=await dirHandle.getFileHandle(fn.endsWith(".html")?fn:"index.html",{create:true});
+    const w=await fh.createWritable(); await w.write(html); await w.close(); dirty=false; toast("Saved to file"); return;
+  }catch(e){} }
+  const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([html],{type:"text/html"}));
+  a.download=fn.endsWith(".html")?fn:"index.html"; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),4000); dirty=false; toast("Downloaded");
 }
 $("s-save").onclick=save; $("i-save").onclick=save;
 document.addEventListener("keydown",e=>{ if((e.metaKey||e.ctrlKey)&&e.key==="s"){ e.preventDefault(); save(); } });
 window.addEventListener("beforeunload",e=>{ if(dirty){ e.preventDefault(); e.returnValue=""; } });
 
-/* ================================================================
-   DEMOS
-   ================================================================ */
-const CASE_ID="7031842950713049811";
-const CASELOG=[];
+/* ================= DEMOS ================= */
+const CASE_ID="7031842950713049811", CASELOG=[];
 function addLog(t,x){ if(!CASELOG.some(l=>l.x===x)) CASELOG.push({t,x}); }
-
 const DEMOS={};
-
-/* --- crop --- */
-DEMOS.crop=function(host){
-  host.innerHTML='<div class="demo"><div class="drop" id="d1"><span class="h">Choose an image</span><span class="s">read on your device · never uploaded</span></div>'+
+DEMOS.crop=function(h){
+  h.innerHTML='<div class="demo"><div class="drop" id="d1"><span class="h">Choose an image</span><span class="s">read on your device · never uploaded</span></div>'+
    '<input type="file" id="f1" accept="image/*" hidden><div class="cstage" id="cs"><canvas id="cc"></canvas><div class="csel" id="cl"></div></div>'+
    '<div class="cout" id="co"><img id="ci" alt="crop"></div><div class="acts" id="ca" style="display:none">'+
    '<button class="act key" id="bC">Copy crop</button><button class="act" id="bD">Save</button><button class="act" id="bR">Reset</button></div>'+
-   '<div class="acts" id="ce" style="display:none">'+
-   '<a class="act" href="https://lens.google.com/upload" target="_blank" rel="noopener">Lens ↗</a>'+
+   '<div class="acts" id="ce" style="display:none"><a class="act" href="https://lens.google.com/upload" target="_blank" rel="noopener">Lens ↗</a>'+
    '<a class="act" href="https://tineye.com" target="_blank" rel="noopener">TinEye ↗</a>'+
    '<a class="act" href="https://yandex.com/images/" target="_blank" rel="noopener">Yandex ↗</a>'+
    '<a class="act" href="https://graph.baidu.com" target="_blank" rel="noopener">Baidu ↗</a></div></div>';
-  const dz=host.querySelector("#d1"),f=host.querySelector("#f1"),cs=host.querySelector("#cs"),
-    cv=host.querySelector("#cc"),sel=host.querySelector("#cl"),co=host.querySelector("#co"),
-    ci=host.querySelector("#ci"),ca=host.querySelector("#ca"),ce=host.querySelector("#ce");
+  const q=s=>h.querySelector(s), dz=q("#d1"),f=q("#f1"),cs=q("#cs"),cv=q("#cc"),sel=q("#cl"),co=q("#co"),ci=q("#ci"),ca=q("#ca"),ce=q("#ce");
   let img=null,start=null,rect=null,blob=null;
-  dz.onclick=()=>f.click();
-  f.onchange=e=>{ if(e.target.files[0]) load(e.target.files[0]); };
+  dz.onclick=()=>f.click(); f.onchange=e=>{ if(e.target.files[0]) load(e.target.files[0]); };
   ["dragenter","dragover"].forEach(v=>dz.addEventListener(v,e=>{e.preventDefault();dz.classList.add("over");}));
   ["dragleave","dragend"].forEach(v=>dz.addEventListener(v,()=>dz.classList.remove("over")));
-  dz.addEventListener("drop",e=>{e.preventDefault();dz.classList.remove("over");
-    const x=e.dataTransfer.files[0]; if(x&&x.type.indexOf("image/")===0) load(x);});
-  function load(file){
-    const u=URL.createObjectURL(file), im=new Image();
-    im.onload=()=>{ img=im; cv.width=im.width; cv.height=im.height;
-      cv.getContext("2d").drawImage(im,0,0); cs.classList.add("on"); dz.style.display="none";
-      ca.style.display="flex"; URL.revokeObjectURL(u); };
-    im.src=u;
-  }
-  function pt(e){ const r=cv.getBoundingClientRect(); const t=e.touches?e.touches[0]:e;
-    return {x:Math.max(0,Math.min(r.width,t.clientX-r.left)),y:Math.max(0,Math.min(r.height,t.clientY-r.top)),r:r}; }
-  function draw(a,b){ const x=Math.min(a.x,b.x),y=Math.min(a.y,b.y),w=Math.abs(a.x-b.x),h=Math.abs(a.y-b.y);
-    sel.style.cssText="left:"+x+"px;top:"+y+"px;width:"+w+"px;height:"+h+"px"; sel.classList.add("on");
-    rect=(w>8&&h>8)?{x,y,w,h,dw:a.r.width,dh:a.r.height}:null; }
+  dz.addEventListener("drop",e=>{e.preventDefault();dz.classList.remove("over");const x=e.dataTransfer.files[0]; if(x&&x.type.indexOf("image/")===0) load(x);});
+  function load(file){ const u=URL.createObjectURL(file), im=new Image();
+    im.onload=()=>{ img=im; cv.width=im.width; cv.height=im.height; cv.getContext("2d").drawImage(im,0,0);
+      cs.classList.add("on"); dz.style.display="none"; ca.style.display="flex"; URL.revokeObjectURL(u); }; im.src=u; }
+  function pt(e){ const r=cv.getBoundingClientRect(), t=e.touches?e.touches[0]:e;
+    return {x:Math.max(0,Math.min(r.width,t.clientX-r.left)),y:Math.max(0,Math.min(r.height,t.clientY-r.top)),r}; }
+  function draw(a,b){ const x=Math.min(a.x,b.x),y=Math.min(a.y,b.y),w=Math.abs(a.x-b.x),ht=Math.abs(a.y-b.y);
+    sel.style.cssText="left:"+x+"px;top:"+y+"px;width:"+w+"px;height:"+ht+"px"; sel.classList.add("on");
+    rect=(w>8&&ht>8)?{x,y,w,h:ht,dw:a.r.width,dh:a.r.height}:null; }
   function down(e){ if(!img) return; e.preventDefault(); start=pt(e); draw(start,start); }
   function move(e){ if(!start) return; e.preventDefault(); draw(start,pt(e)); }
   function up(){ if(start&&rect) crop(); start=null; }
-  function crop(){
-    const sx=img.width/rect.dw, sy=img.height/rect.dh, c=document.createElement("canvas");
+  function crop(){ const sx=img.width/rect.dw, sy=img.height/rect.dh, c=document.createElement("canvas");
     c.width=Math.round(rect.w*sx); c.height=Math.round(rect.h*sy);
     c.getContext("2d").drawImage(img,rect.x*sx,rect.y*sy,c.width,c.height,0,0,c.width,c.height);
-    ci.src=c.toDataURL("image/png"); co.classList.add("on"); ce.style.display="flex";
-    c.toBlob(b=>blob=b,"image/png");
-  }
+    ci.src=c.toDataURL("image/png"); co.classList.add("on"); ce.style.display="flex"; c.toBlob(b=>blob=b,"image/png"); }
   cs.addEventListener("mousedown",down); window.addEventListener("mousemove",move); window.addEventListener("mouseup",up);
   cs.addEventListener("touchstart",down,{passive:false}); cs.addEventListener("touchmove",move,{passive:false}); cs.addEventListener("touchend",up);
-  host.querySelector("#bC").onclick=async()=>{
-    const b=host.querySelector("#bC");
-    try{ await navigator.clipboard.write([new ClipboardItem({"image/png":blob})]); b.textContent="Copied ✓"; }
-    catch(err){ b.textContent="Use Save"; }
-    setTimeout(()=>b.textContent="Copy crop",1600);
-  };
-  host.querySelector("#bD").onclick=()=>{ if(!ci.src) return; const a=document.createElement("a"); a.href=ci.src; a.download="crop.png"; a.click(); };
-  host.querySelector("#bR").onclick=()=>{ img=null;blob=null;rect=null;cs.classList.remove("on");sel.classList.remove("on");
-    co.classList.remove("on");ca.style.display="none";ce.style.display="none";dz.style.display="grid";f.value=""; };
+  q("#bC").onclick=async()=>{ const b=q("#bC");
+    try{ await navigator.clipboard.write([new ClipboardItem({"image/png":blob})]); b.textContent="Copied ✓"; }catch(e){ b.textContent="Use Save"; }
+    setTimeout(()=>b.textContent="Copy crop",1500); };
+  q("#bD").onclick=()=>{ if(!ci.src) return; const a=document.createElement("a"); a.href=ci.src; a.download="crop.png"; a.click(); };
+  q("#bR").onclick=()=>{ img=null;blob=null;rect=null;cs.classList.remove("on");sel.classList.remove("on");co.classList.remove("on");
+    ca.style.display="none";ce.style.display="none";dz.style.display="grid";f.value=""; };
 };
-
-/* --- engines --- */
-DEMOS.engines=function(host){
+DEMOS.engines=function(h){
   const Q=[["face","A face"],["place","A building or landscape"],["cn","Chinese text or a China claim"],["exact","The earliest copy, exactly"],["ru","Russia or Central Asia"]];
   const R={face:{Yandex:5,Lens:3,TinEye:1,"Baidu 识图":2},place:{Yandex:5,Lens:4,TinEye:1,"Baidu 识图":2},
-    cn:{"Baidu 识图":6,Lens:3,Yandex:2,TinEye:1},exact:{TinEye:6,Lens:3,Yandex:2,"Baidu 识图":1},ru:{Yandex:6,Lens:2,TinEye:2,"Baidu 识图":1}};
-  host.innerHTML='<div class="demo"><ul class="taps">'+Q.map(q=>'<li><button class="tap" aria-pressed="false" data-k="'+q[0]+'"><span class="bx">✓</span><span>'+q[1]+'</span></button></li>').join("")+
-    '</ul><div class="read" id="eo">What is in the frame?</div></div>';
-  const on=new Set(), out=host.querySelector("#eo");
-  host.addEventListener("click",e=>{
-    const b=e.target.closest(".tap"); if(!b) return;
+   cn:{"Baidu 识图":6,Lens:3,Yandex:2,TinEye:1},exact:{TinEye:6,Lens:3,Yandex:2,"Baidu 识图":1},ru:{Yandex:6,Lens:2,TinEye:2,"Baidu 识图":1}};
+  h.innerHTML='<div class="demo"><ul class="taps">'+Q.map(q=>'<li><button class="tap" aria-pressed="false" data-k="'+q[0]+'"><span class="bx">✓</span><span>'+q[1]+'</span></button></li>').join("")+
+   '</ul><div class="read" id="eo">What is in the frame?</div></div>';
+  const on=new Set(), out=h.querySelector("#eo");
+  h.addEventListener("click",e=>{ const b=e.target.closest(".tap"); if(!b) return;
     const p=b.getAttribute("aria-pressed")==="true"; b.setAttribute("aria-pressed",String(!p));
     if(p) on.delete(b.dataset.k); else on.add(b.dataset.k);
     if(!on.size){ out.textContent="What is in the frame?"; return; }
     const sc={}; on.forEach(k=>Object.entries(R[k]).forEach(([e2,v])=>sc[e2]=(sc[e2]||0)+v));
-    out.innerHTML=Object.entries(sc).sort((a,b2)=>b2[1]-a[1]).map(([e2],i)=>"<b>"+(i+1)+"</b>  "+e2).join("\n")+
-      "\n\nStop when two of them agree.";
-  });
+    out.innerHTML=Object.entries(sc).sort((a,b2)=>b2[1]-a[1]).map(([e2],i)=>"<b>"+(i+1)+"</b>  "+e2).join("\n")+"\n\nStop when two agree."; });
 };
-
-/* --- inventory --- */
-DEMOS.inventory=function(host){
-  const F=["Signage, and its script","Vehicle plates and side of the road","Kerbs, markings, drain covers",
-    "Pylons, poles, wire layout","Roof shapes and window rhythm","Vegetation and season",
-    "Terrain line on the horizon","Uniforms, livery, branding","Light direction","Anything under construction"];
+DEMOS.inventory=function(h){
+  const F=["Signage, and its script","Vehicle plates and side of the road","Kerbs, markings, drain covers","Pylons, poles, wire layout",
+   "Roof shapes and window rhythm","Vegetation and season","Terrain on the horizon","Uniforms, livery, branding","Light direction","Anything under construction"];
   const L=["start with the signage.","one is a coincidence.","two is still a coincidence.","three is getting somewhere.",
-    "four narrows it to a neighbourhood.","five is a geolocation.","solid — write it up feature by feature."];
-  host.innerHTML='<div class="demo"><ul class="taps">'+F.map(f=>'<li><button class="tap" aria-pressed="false"><span class="bx">✓</span><span>'+f+'</span></button></li>').join("")+
-    '</ul><div class="read" id="io"><b>0</b>  start with the signage.</div></div>';
-  host.addEventListener("click",e=>{
-    const b=e.target.closest(".tap"); if(!b) return;
+   "four narrows it to a neighbourhood.","five is a geolocation.","solid — write it up feature by feature."];
+  h.innerHTML='<div class="demo"><ul class="taps">'+F.map(f=>'<li><button class="tap" aria-pressed="false"><span class="bx">✓</span><span>'+f+'</span></button></li>').join("")+
+   '</ul><div class="read" id="io"><b>0</b>  start with the signage.</div></div>';
+  h.addEventListener("click",e=>{ const b=e.target.closest(".tap"); if(!b) return;
     b.setAttribute("aria-pressed",String(b.getAttribute("aria-pressed")!=="true"));
-    const n=host.querySelectorAll('[aria-pressed="true"]').length;
-    host.querySelector("#io").innerHTML="<b>"+n+"</b>  "+L[Math.min(n,6)];
-  });
+    const n=h.querySelectorAll('[aria-pressed="true"]').length;
+    h.querySelector("#io").innerHTML="<b>"+n+"</b>  "+L[Math.min(n,6)]; });
 };
-
-/* --- sun --- */
-DEMOS.sun=function(host){
-  host.innerHTML='<div class="demo"><div class="two">'+
-    '<div class="f"><label>Latitude</label><input id="sa" type="number" step="0.0001" value="1.3521"></div>'+
-    '<div class="f"><label>Longitude</label><input id="so" type="number" step="0.0001" value="103.8198"></div></div>'+
-    '<div class="two"><div class="f"><label>Date</label><input id="sd" type="date" value="2026-08-05"></div>'+
-    '<div class="f"><label>UTC offset</label><input id="sz" type="number" step="0.5" value="8"></div></div>'+
-    '<div class="f"><label>Local time</label><div class="rngrow"><input class="rng" id="st" type="range" min="0" max="1439" step="5" value="600"><output id="stl">10:00</output></div></div>'+
-    '<svg id="cmp" viewBox="0 0 200 200" style="width:100%;max-width:190px;display:block;margin:6px auto 0"></svg>'+
-    '<div class="read" id="sr"></div></div>';
-  const rad=Math.PI/180, deg=180/Math.PI, q=s=>host.querySelector(s);
+DEMOS.sun=function(h){
+  h.innerHTML='<div class="demo"><div class="two"><div class="f"><label>Latitude</label><input id="sa" type="number" step="0.0001" value="1.3521"></div>'+
+   '<div class="f"><label>Longitude</label><input id="so" type="number" step="0.0001" value="103.8198"></div></div>'+
+   '<div class="two"><div class="f"><label>Date</label><input id="sd" type="date" value="2026-08-05"></div>'+
+   '<div class="f"><label>UTC offset</label><input id="sz" type="number" step="0.5" value="8"></div></div>'+
+   '<div class="f"><label>Local time</label><div class="rngrow"><input class="rng" id="st" type="range" min="0" max="1439" step="5" value="600"><output id="stl">10:00</output></div></div>'+
+   '<svg id="cmp" viewBox="0 0 200 200" style="width:100%;max-width:180px;display:block;margin:4px auto 0"></svg><div class="read" id="sr"></div></div>';
+  const rad=Math.PI/180, deg=180/Math.PI, q=s=>h.querySelector(s);
   function jd(y,m,d){ if(m<=2){y-=1;m+=12;} const A=Math.floor(y/100),B=2-A+Math.floor(A/4);
     return Math.floor(365.25*(y+4716))+Math.floor(30.6001*(m+1))+d+B-1524.5; }
   function solar(y,m,d,mi,tz,la,lo){
     const T=(jd(y,m,d)+(mi-tz*60)/1440-2451545)/36525;
     const L0=(280.46646+T*(36000.76983+T*0.0003032))%360, M=357.52911+T*(35999.05029-0.0001537*T),
-      e=0.016708634-T*(0.000042037+0.0000001267*T),
-      C=Math.sin(M*rad)*(1.914602-T*(0.004817+0.000014*T))+Math.sin(2*M*rad)*(0.019993-0.000101*T)+Math.sin(3*M*rad)*0.000289,
-      om=125.04-1934.136*T, lam=L0+C-0.00569-0.00478*Math.sin(om*rad),
-      sec=21.448-T*(46.815+T*(0.00059-T*0.001813)), e0=23+(26+sec/60)/60, eps=e0+0.00256*Math.cos(om*rad),
-      dec=Math.asin(Math.sin(eps*rad)*Math.sin(lam*rad))*deg, vY=Math.pow(Math.tan(eps/2*rad),2),
-      eot=4*deg*(vY*Math.sin(2*L0*rad)-2*e*Math.sin(M*rad)+4*e*vY*Math.sin(M*rad)*Math.cos(2*L0*rad)-0.5*vY*vY*Math.sin(4*L0*rad)-1.25*e*e*Math.sin(2*M*rad)),
-      tst=(mi+eot+4*lo-60*tz+1440)%1440, ha=tst/4<0?tst/4+180:tst/4-180,
-      zen=Math.acos(Math.sin(la*rad)*Math.sin(dec*rad)+Math.cos(la*rad)*Math.cos(dec*rad)*Math.cos(ha*rad))*deg;
+     e=0.016708634-T*(0.000042037+0.0000001267*T),
+     C=Math.sin(M*rad)*(1.914602-T*(0.004817+0.000014*T))+Math.sin(2*M*rad)*(0.019993-0.000101*T)+Math.sin(3*M*rad)*0.000289,
+     om=125.04-1934.136*T, lam=L0+C-0.00569-0.00478*Math.sin(om*rad),
+     sec=21.448-T*(46.815+T*(0.00059-T*0.001813)), e0=23+(26+sec/60)/60, eps=e0+0.00256*Math.cos(om*rad),
+     dec=Math.asin(Math.sin(eps*rad)*Math.sin(lam*rad))*deg, vY=Math.pow(Math.tan(eps/2*rad),2),
+     eot=4*deg*(vY*Math.sin(2*L0*rad)-2*e*Math.sin(M*rad)+4*e*vY*Math.sin(M*rad)*Math.cos(2*L0*rad)-0.5*vY*vY*Math.sin(4*L0*rad)-1.25*e*e*Math.sin(2*M*rad)),
+     tst=(mi+eot+4*lo-60*tz+1440)%1440, ha=tst/4<0?tst/4+180:tst/4-180,
+     zen=Math.acos(Math.sin(la*rad)*Math.sin(dec*rad)+Math.cos(la*rad)*Math.cos(dec*rad)*Math.cos(ha*rad))*deg;
     let az; const el=90-zen;
     if(Math.abs(Math.cos(zen*rad))>0.9999999) az=ha>0?180:0;
-    else{ az=Math.acos(((Math.sin(la*rad)*Math.cos(zen*rad))-Math.sin(dec*rad))/(Math.cos(la*rad)*Math.sin(zen*rad)))*deg;
-      az=ha>0?(az+180)%360:(540-az)%360; }
+    else{ az=Math.acos(((Math.sin(la*rad)*Math.cos(zen*rad))-Math.sin(dec*rad))/(Math.cos(la*rad)*Math.sin(zen*rad)))*deg; az=ha>0?(az+180)%360:(540-az)%360; }
     return {el,az};
   }
-  const NAMES=["north","north-east","east","south-east","south","south-west","west","north-west"];
-  function draw(sa,el){
-    const r=68,cx=100,cy=100,a=(sa-90)*rad;
+  const N=["north","north-east","east","south-east","south","south-west","west","north-west"];
+  function draw(sa,el){ const r=66,cx=100,cy=100,a=(sa-90)*rad;
     const len=el>2?Math.min(r,18+r*Math.min(3,1/Math.tan(el*rad))/3):r;
-    const marks=["N","E","S","W"].map((t,i)=>{ const g=(i*90-90)*rad;
-      return '<text x="'+(cx+Math.cos(g)*(r+15))+'" y="'+(cy+Math.sin(g)*(r+15)+4)+'" text-anchor="middle" font-size="10" font-family="monospace" fill="#6B7280">'+t+'</text>';}).join("");
-    q("#cmp").innerHTML='<circle cx="100" cy="100" r="'+r+'" fill="none" stroke="#2B303A"/><circle cx="100" cy="100" r="'+(r/2)+'" fill="none" stroke="#22262E"/>'+marks+
-      (el>0?'<line x1="100" y1="100" x2="'+(cx+Math.cos(a)*len)+'" y2="'+(cy+Math.sin(a)*len)+'" stroke="#C9A227" stroke-width="6" stroke-linecap="round"/><circle cx="100" cy="100" r="4" fill="#F3F1EC"/>'
-            :'<text x="100" y="104" text-anchor="middle" font-size="11" font-family="monospace" fill="#C4635C">below horizon</text>');
-  }
-  function run(){
-    const p=q("#sd").value.split("-").map(Number); if(!p[0]) return;
-    const mi=+q("#st").value;
-    q("#stl").textContent=String(Math.floor(mi/60)).padStart(2,"0")+":"+String(mi%60).padStart(2,"0");
+    const marks=["N","E","S","W"].map((t,i)=>{const g=(i*90-90)*rad;
+      return '<text x="'+(cx+Math.cos(g)*(r+15))+'" y="'+(cy+Math.sin(g)*(r+15)+4)+'" text-anchor="middle" font-size="10" font-family="monospace" fill="#8B8BA3">'+t+'</text>';}).join("");
+    q("#cmp").innerHTML='<circle cx="100" cy="100" r="'+r+'" fill="#fff" stroke="#EAE9F4"/><circle cx="100" cy="100" r="'+(r/2)+'" fill="none" stroke="#F3F2FA"/>'+marks+
+      (el>0?'<line x1="100" y1="100" x2="'+(cx+Math.cos(a)*len)+'" y2="'+(cy+Math.sin(a)*len)+'" stroke="#6C5CE7" stroke-width="6" stroke-linecap="round"/><circle cx="100" cy="100" r="4" fill="#131320"/>'
+           :'<text x="100" y="104" text-anchor="middle" font-size="11" font-family="monospace" fill="#D2695E">below horizon</text>'); }
+  function run(){ const p=q("#sd").value.split("-").map(Number); if(!p[0]) return;
+    const mi=+q("#st").value; q("#stl").textContent=String(Math.floor(mi/60)).padStart(2,"0")+":"+String(mi%60).padStart(2,"0");
     const s=solar(p[0],p[1],p[2],mi,+q("#sz").value,+q("#sa").value,+q("#so").value);
-    const sa=(s.az+180)%360, ratio=s.el>0.5?1/Math.tan(s.el*rad):null;
-    draw(sa,s.el);
-    q("#sr").innerHTML = s.el<=0
-      ? "<b>Sun is down.</b>\nA daylight shadow rules this time out."
-      : "<b>Elevation</b>  "+s.el.toFixed(1)+"°\n<b>Shadow</b>     "+sa.toFixed(0)+"° · "+NAMES[Math.round(sa/45)%8]+
-        "\n<b>Length</b>     "+(ratio>20?"very long":ratio.toFixed(2)+"× height");
-  }
+    const sa=(s.az+180)%360, ratio=s.el>0.5?1/Math.tan(s.el*rad):null; draw(sa,s.el);
+    q("#sr").innerHTML=s.el<=0?"<b>Sun is down.</b>\nA daylight shadow rules this time out."
+      :"<b>Elevation</b>  "+s.el.toFixed(1)+"°\n<b>Shadow</b>     "+sa.toFixed(0)+"° · "+N[Math.round(sa/45)%8]+
+       "\n<b>Length</b>     "+(ratio>20?"very long":ratio.toFixed(2)+"× height"); }
   ["#sa","#so","#sd","#sz","#st"].forEach(s=>q(s).addEventListener("input",run)); run();
 };
-
-/* --- coords --- */
-DEMOS.coords=function(host){
-  host.innerHTML='<div class="demo"><div class="two">'+
-    '<div class="f"><label>Lat (WGS-84)</label><input id="ca" type="number" step="0.000001" value="39.908722"></div>'+
-    '<div class="f"><label>Lon (WGS-84)</label><input id="cb" type="number" step="0.000001" value="116.397499"></div></div>'+
-    '<div class="acts" style="margin-top:2px"><button class="act" data-p="39.908722,116.397499">Beijing</button>'+
-    '<button class="act" data-p="31.230416,121.473701">Shanghai</button>'+
-    '<button class="act" data-p="1.352100,103.819800">Singapore</button></div><div class="read" id="cr"></div></div>';
-  const X=Math.PI*3000/180, ee=0.00669342162296594323, a=6378245, q=s=>host.querySelector(s);
+DEMOS.coords=function(h){
+  h.innerHTML='<div class="demo"><div class="two"><div class="f"><label>Lat (WGS-84)</label><input id="ca" type="number" step="0.000001" value="39.908722"></div>'+
+   '<div class="f"><label>Lon (WGS-84)</label><input id="cb" type="number" step="0.000001" value="116.397499"></div></div>'+
+   '<div class="acts"><button class="act" data-p="39.908722,116.397499">Beijing</button><button class="act" data-p="31.230416,121.473701">Shanghai</button>'+
+   '<button class="act" data-p="1.352100,103.819800">Singapore</button></div><div class="read" id="cr"></div></div>';
+  const X=Math.PI*3000/180, ee=0.00669342162296594323, a=6378245, q=s=>h.querySelector(s);
   const outCN=(la,lo)=>!(lo>73.66&&lo<135.05&&la>3.86&&la<53.55);
   function tl(x,y){let r=-100+2*x+3*y+0.2*y*y+0.1*x*y+0.2*Math.sqrt(Math.abs(x));
     r+=(20*Math.sin(6*x*Math.PI)+20*Math.sin(2*x*Math.PI))*2/3;r+=(20*Math.sin(y*Math.PI)+40*Math.sin(y/3*Math.PI))*2/3;
@@ -2498,259 +2657,188 @@ DEMOS.coords=function(host){
   function w2g(la,lo){ if(outCN(la,lo)) return [la,lo];
     let dLa=tl(lo-105,la-35),dLo=tg(lo-105,la-35); const rl=la/180*Math.PI;
     let mg=Math.sin(rl); mg=1-ee*mg*mg; const sq=Math.sqrt(mg);
-    dLa=(dLa*180)/((a*(1-ee))/(mg*sq)*Math.PI); dLo=(dLo*180)/(a/sq*Math.cos(rl)*Math.PI);
-    return [la+dLa,lo+dLo]; }
+    dLa=(dLa*180)/((a*(1-ee))/(mg*sq)*Math.PI); dLo=(dLo*180)/(a/sq*Math.cos(rl)*Math.PI); return [la+dLa,lo+dLo]; }
   function g2b(la,lo){ const z=Math.sqrt(lo*lo+la*la)+0.00002*Math.sin(la*X), t=Math.atan2(la,lo)+0.000003*Math.cos(lo*X);
     return [z*Math.sin(t)+0.006, z*Math.cos(t)+0.0065]; }
-  function dist(a1,o1,a2,o2){ const R=6371000,p1=a1*Math.PI/180,p2=a2*Math.PI/180,
-    dp=(a2-a1)*Math.PI/180, dl=(o2-o1)*Math.PI/180;
+  function dist(a1,o1,a2,o2){ const R=6371000,p1=a1*Math.PI/180,p2=a2*Math.PI/180,dp=(a2-a1)*Math.PI/180,dl=(o2-o1)*Math.PI/180;
     return 2*R*Math.asin(Math.sqrt(Math.pow(Math.sin(dp/2),2)+Math.cos(p1)*Math.cos(p2)*Math.pow(Math.sin(dl/2),2))); }
-  function run(){
-    const la=+q("#ca").value, lo=+q("#cb").value;
+  function run(){ const la=+q("#ca").value, lo=+q("#cb").value;
     if(isNaN(la)||isNaN(lo)){ q("#cr").textContent="Enter a coordinate."; return; }
-    if(outCN(la,lo)){ q("#cr").innerHTML="<b>Outside mainland China.</b>\nThe offsets do not apply here — all three systems agree."; return; }
+    if(outCN(la,lo)){ q("#cr").innerHTML="<b>Outside mainland China.</b>\nThe offsets do not apply — all three systems agree."; return; }
     const g=w2g(la,lo), b=g2b(g[0],g[1]);
     q("#cr").innerHTML="<b>GCJ-02</b>  AMAP 高德\n  "+g[0].toFixed(6)+", "+g[1].toFixed(6)+"\n  <i>"+Math.round(dist(la,lo,g[0],g[1]))+" m off</i>"+
-      "\n\n<b>BD-09</b>   Baidu 百度\n  "+b[0].toFixed(6)+", "+b[1].toFixed(6)+"\n  <i>"+Math.round(dist(la,lo,b[0],b[1]))+" m off</i>";
-  }
+      "\n\n<b>BD-09</b>   Baidu 百度\n  "+b[0].toFixed(6)+", "+b[1].toFixed(6)+"\n  <i>"+Math.round(dist(la,lo,b[0],b[1]))+" m off</i>"; }
   ["#ca","#cb"].forEach(s=>q(s).addEventListener("input",run));
-  host.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{ const p=b.dataset.p.split(","); q("#ca").value=p[0]; q("#cb").value=p[1]; run(); });
+  h.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{const p=b.dataset.p.split(","); q("#ca").value=p[0]; q("#cb").value=p[1]; run();});
   run();
 };
-
-/* --- inspect --- */
-DEMOS.inspect=function(host){
-  host.innerHTML='<div class="demo"><div class="drop" id="d2"><span class="h">Choose an image</span><span class="s">JPEG or PNG · parsed locally</span></div>'+
-    '<input type="file" id="f2" accept="image/*" hidden><div class="read" id="ir" style="display:none"></div>'+
-    '<div class="acts" id="ia" style="display:none">'+
-    '<a class="act" href="https://contentcredentials.org/verify" target="_blank" rel="noopener">Verify C2PA ↗</a>'+
-    '<a class="act" href="https://www.metadata2go.com" target="_blank" rel="noopener">Full metadata ↗</a></div></div>';
-  const dz=host.querySelector("#d2"), f=host.querySelector("#f2"), out=host.querySelector("#ir"), acts=host.querySelector("#ia");
-  dz.onclick=()=>f.click();
-  f.onchange=e=>{ if(e.target.files[0]) read(e.target.files[0]); };
+DEMOS.inspect=function(h){
+  h.innerHTML='<div class="demo"><div class="drop" id="d2"><span class="h">Choose an image</span><span class="s">JPEG or PNG · parsed locally</span></div>'+
+   '<input type="file" id="f2" accept="image/*" hidden><div class="read" id="ir" style="display:none"></div>'+
+   '<div class="acts" id="ia" style="display:none"><a class="act" href="https://contentcredentials.org/verify" target="_blank" rel="noopener">Verify C2PA ↗</a>'+
+   '<a class="act" href="https://www.metadata2go.com" target="_blank" rel="noopener">Full metadata ↗</a></div></div>';
+  const q=s=>h.querySelector(s), dz=q("#d2"), f=q("#f2"), out=q("#ir"), acts=q("#ia");
+  dz.onclick=()=>f.click(); f.onchange=e=>{ if(e.target.files[0]) read(e.target.files[0]); };
   ["dragenter","dragover"].forEach(v=>dz.addEventListener(v,e=>{e.preventDefault();dz.classList.add("over");}));
   ["dragleave","dragend"].forEach(v=>dz.addEventListener(v,()=>dz.classList.remove("over")));
-  dz.addEventListener("drop",e=>{e.preventDefault();dz.classList.remove("over");
-    const x=e.dataTransfer.files[0]; if(x&&x.type.indexOf("image/")===0) read(x);});
-  const TAG={0x010F:"Make",0x0110:"Model",0x0131:"Software",0x9003:"Captured",0x0132:"File date",0xA434:"Lens"};
-  const SZ={1:1,2:1,3:2,4:4,5:8,7:1,9:4,10:8};
-  function ifd(dv,base,off,le,into){
-    const n=dv.getUint16(off,le), res={};
-    for(let i=0;i<n;i++){
-      const e=off+2+i*12, tag=dv.getUint16(e,le), ty=dv.getUint16(e+2,le), ct=dv.getUint32(e+4,le);
+  dz.addEventListener("drop",e=>{e.preventDefault();dz.classList.remove("over");const x=e.dataTransfer.files[0]; if(x&&x.type.indexOf("image/")===0) read(x);});
+  const TAG={0x010F:"Make",0x0110:"Model",0x0131:"Software",0x9003:"Captured",0x0132:"File date",0xA434:"Lens"}, SZ={1:1,2:1,3:2,4:4,5:8,7:1,9:4,10:8};
+  function ifd(dv,base,off,le,into){ const n=dv.getUint16(off,le), res={};
+    for(let i=0;i<n;i++){ const e=off+2+i*12, tag=dv.getUint16(e,le), ty=dv.getUint16(e+2,le), ct=dv.getUint32(e+4,le);
       const ln=(SZ[ty]||1)*ct; let vo=e+8; if(ln>4) vo=base+dv.getUint32(e+8,le);
-      if(vo<0||vo+ln>dv.byteLength) continue;
-      let v=null;
-      if(ty===2){ let s=""; for(let j=0;j<ct-1;j++){ const c=dv.getUint8(vo+j); if(c) s+=String.fromCharCode(c);} v=s.trim(); }
-      else if(ty===3) v=dv.getUint16(vo,le);
-      else if(ty===4) v=dv.getUint32(vo,le);
-      else if(ty===5){ const A=[]; for(let j=0;j<ct;j++){ const nu=dv.getUint32(vo+j*8,le), de=dv.getUint32(vo+j*8+4,le); A.push(de?nu/de:0);} v=ct===1?A[0]:A; }
-      res[tag]=v; if(TAG[tag]&&v!==null&&v!=="") into[TAG[tag]]=v;
-    }
-    if(res[0x8769]) ifd(dv,base,base+res[0x8769],le,into);
-    return res;
-  }
-  function gps(dv,base,off,le){
-    const n=dv.getUint16(off,le), g={};
-    for(let i=0;i<n;i++){
-      const e=off+2+i*12, tag=dv.getUint16(e,le), ty=dv.getUint16(e+2,le), ct=dv.getUint32(e+4,le);
-      const ln=(SZ[ty]||1)*ct; let vo=e+8; if(ln>4) vo=base+dv.getUint32(e+8,le);
-      if(vo+ln>dv.byteLength) continue;
-      if(ty===2){ let s=""; for(let j=0;j<ct-1;j++){ const c=dv.getUint8(vo+j); if(c) s+=String.fromCharCode(c);} g[tag]=s.trim(); }
-      else if(ty===5){ const A=[]; for(let j=0;j<ct;j++){ const nu=dv.getUint32(vo+j*8,le), de=dv.getUint32(vo+j*8+4,le); A.push(de?nu/de:0);} g[tag]=A; }
-    }
+      if(vo<0||vo+ln>dv.byteLength) continue; let v=null;
+      if(ty===2){ let s=""; for(let j=0;j<ct-1;j++){const c=dv.getUint8(vo+j); if(c) s+=String.fromCharCode(c);} v=s.trim(); }
+      else if(ty===3) v=dv.getUint16(vo,le); else if(ty===4) v=dv.getUint32(vo,le);
+      else if(ty===5){ const A=[]; for(let j=0;j<ct;j++){const nu=dv.getUint32(vo+j*8,le), de=dv.getUint32(vo+j*8+4,le); A.push(de?nu/de:0);} v=ct===1?A[0]:A; }
+      res[tag]=v; if(TAG[tag]&&v!==null&&v!=="") into[TAG[tag]]=v; }
+    if(res[0x8769]) ifd(dv,base,base+res[0x8769],le,into); return res; }
+  function gps(dv,base,off,le){ const n=dv.getUint16(off,le), g={};
+    for(let i=0;i<n;i++){ const e=off+2+i*12, tag=dv.getUint16(e,le), ty=dv.getUint16(e+2,le), ct=dv.getUint32(e+4,le);
+      const ln=(SZ[ty]||1)*ct; let vo=e+8; if(ln>4) vo=base+dv.getUint32(e+8,le); if(vo+ln>dv.byteLength) continue;
+      if(ty===2){ let s=""; for(let j=0;j<ct-1;j++){const c=dv.getUint8(vo+j); if(c) s+=String.fromCharCode(c);} g[tag]=s.trim(); }
+      else if(ty===5){ const A=[]; for(let j=0;j<ct;j++){const nu=dv.getUint32(vo+j*8,le), de=dv.getUint32(vo+j*8+4,le); A.push(de?nu/de:0);} g[tag]=A; } }
     const d=x=>x&&x.length===3?x[0]+x[1]/60+x[2]/3600:null;
     const la=d(g[2]), lo=d(g[4]); if(la==null||lo==null) return null;
-    return {lat:g[1]==="S"?-la:la, lon:g[3]==="W"?-lo:lo};
-  }
-  function scan(b,needle,lim){
-    const n=needle.split("").map(c=>c.charCodeAt(0)), end=Math.min(b.length,lim||b.length);
-    outer: for(let i=0;i<end-n.length;i++){ for(let j=0;j<n.length;j++) if(b[i+j]!==n[j]) continue outer; return true; }
-    return false;
-  }
-  function read(file){
-    const fr=new FileReader();
-    fr.onload=()=>{
-      const buf=fr.result, b=new Uint8Array(buf), dv=new DataView(buf);
-      const info={}; let kind="?", w=0, h=0, G=null, c2=false;
-      if(b[0]===0xFF&&b[1]===0xD8){
-        kind="JPEG"; let p=2;
-        while(p<b.length-3){
-          if(b[p]!==0xFF){p++;continue;}
-          const m=b[p+1];
-          if(m===0xD8||m===0x01||(m>=0xD0&&m<=0xD7)){p+=2;continue;}
-          if(m===0xDA) break;
+    return {lat:g[1]==="S"?-la:la, lon:g[3]==="W"?-lo:lo}; }
+  function scan(b,nd,lim){ const n=nd.split("").map(c=>c.charCodeAt(0)), end=Math.min(b.length,lim||b.length);
+    outer: for(let i=0;i<end-n.length;i++){ for(let j=0;j<n.length;j++) if(b[i+j]!==n[j]) continue outer; return true; } return false; }
+  function read(file){ const fr=new FileReader();
+    fr.onload=()=>{ const buf=fr.result, b=new Uint8Array(buf), dv=new DataView(buf);
+      const info={}; let kind="?", w=0, ht=0, G=null, c2=false;
+      if(b[0]===0xFF&&b[1]===0xD8){ kind="JPEG"; let p=2;
+        while(p<b.length-3){ if(b[p]!==0xFF){p++;continue;} const m=b[p+1];
+          if(m===0xD8||m===0x01||(m>=0xD0&&m<=0xD7)){p+=2;continue;} if(m===0xDA) break;
           const ln=dv.getUint16(p+2,false);
           if(m===0xE1){ let s=""; for(let i=0;i<4;i++) s+=String.fromCharCode(b[p+4+i]);
             if(s==="Exif"){ const base=p+10, le=dv.getUint16(base,false)===0x4949;
-              const r=ifd(dv,base,base+dv.getUint32(base+4,le),le,info);
-              if(r[0x8825]) G=gps(dv,base,base+r[0x8825],le); } }
+              const r=ifd(dv,base,base+dv.getUint32(base+4,le),le,info); if(r[0x8825]) G=gps(dv,base,base+r[0x8825],le); } }
           if((m===0xEB||m===0xE2)&&scan(b.subarray(p,p+ln+2),"c2pa")) c2=true;
-          if(m>=0xC0&&m<=0xCF&&m!==0xC4&&m!==0xC8&&m!==0xCC){ h=dv.getUint16(p+5,false); w=dv.getUint16(p+7,false); }
-          p+=2+ln;
-        }
-      } else if(b[0]===0x89&&b[1]===0x50){
-        kind="PNG"; let p=8;
-        while(p<b.length-8){
-          const ln=dv.getUint32(p,false); let t=""; for(let i=0;i<4;i++) t+=String.fromCharCode(b[p+4+i]);
-          if(t==="IHDR"){ w=dv.getUint32(p+8,false); h=dv.getUint32(p+12,false); }
+          if(m>=0xC0&&m<=0xCF&&m!==0xC4&&m!==0xC8&&m!==0xCC){ ht=dv.getUint16(p+5,false); w=dv.getUint16(p+7,false); }
+          p+=2+ln; }
+      } else if(b[0]===0x89&&b[1]===0x50){ kind="PNG"; let p=8;
+        while(p<b.length-8){ const ln=dv.getUint32(p,false); let t=""; for(let i=0;i<4;i++) t+=String.fromCharCode(b[p+4+i]);
+          if(t==="IHDR"){ w=dv.getUint32(p+8,false); ht=dv.getUint32(p+12,false); }
           if(t==="caBX") c2=true;
           if(t==="eXIf"){ const base=p+8, le=dv.getUint16(base,false)===0x4949;
-            const r=ifd(dv,base,base+dv.getUint32(base+4,le),le,info);
-            if(r[0x8825]) G=gps(dv,base,base+r[0x8825],le); }
-          if(ln<0||ln>b.length) break; p+=12+ln;
-        }
-      }
-      if(!c2 && scan(b,"c2pa",3000000)) c2=true;
-      const K=Object.keys(info); const L=[];
-      L.push("<b>"+kind+"</b>  "+(w?w+"×"+h+" · ":"")+(file.size/1024).toFixed(0)+" KB");
-      L.push("");
-      if(K.length){ K.forEach(k=>L.push("<b>"+k+"</b>".padEnd(4)+"  "+String(info[k]).slice(0,34))); }
+            const r=ifd(dv,base,base+dv.getUint32(base+4,le),le,info); if(r[0x8825]) G=gps(dv,base,base+r[0x8825],le); }
+          if(ln<0||ln>b.length) break; p+=12+ln; } }
+      if(!c2&&scan(b,"c2pa",3000000)) c2=true;
+      const K=Object.keys(info), L=[];
+      L.push("<b>"+kind+"</b>  "+(w?w+"×"+ht+" · ":"")+(file.size/1024).toFixed(0)+" KB"); L.push("");
+      if(K.length) K.forEach(k=>L.push("<b>"+k+"</b>  "+String(info[k]).slice(0,34)));
       else L.push("<b>No EXIF.</b>\n<i>Normal after any platform upload.</i>");
       L.push("");
       L.push(G?"<b>GPS</b>  "+G.lat.toFixed(5)+", "+G.lon.toFixed(5)+"\n<i>WGS-84 — convert for Chinese maps.</i>":"<b>No GPS.</b>");
       L.push("");
       L.push(c2?"<b>C2PA marker found.</b>\n<i>Verify the signature below.</i>":"<b>No credentials.</b>\n<i>Absence proves nothing.</i>");
-      out.innerHTML=L.join("\n"); out.style.display="block"; acts.style.display="flex"; dz.style.display="none";
-    };
-    fr.readAsArrayBuffer(file);
-  }
+      out.innerHTML=L.join("\n"); out.style.display="block"; acts.style.display="flex"; dz.style.display="none"; };
+    fr.readAsArrayBuffer(file); }
 };
-
-/* --- score --- */
-DEMOS.score=function(host){
-  host.innerHTML='<div class="demo"><div class="rngrow"><input class="rng" id="ds" type="range" min="0" max="100" value="72"><output id="dv">72%</output></div><div class="read" id="dt"></div></div>';
-  const s=host.querySelector("#ds"), o=host.querySelector("#dv"), t=host.querySelector("#dt");
-  function run(){
-    const v=+s.value; o.textContent=v+"%";
-    t.innerHTML = v<25 ? "<b>You may say</b>\nNo strong indicators found.\n\n<b>You may not say</b>\nThis is authentic."
-      : v<60 ? "<b>You may say</b>\nInconclusive.\n\n<b>You may not say</b>\nAnything else. This is noise."
-      : v<85 ? "<b>You may say</b>\nWorth investigating — here is what we did next.\n\n<b>You may not say</b>\nThis is AI-generated."
-      : "<b>You may say</b>\nTwo independent detectors agree, and so does the provenance.\n\n<b>You may not say</b>\nThe number. Ever.";
-  }
+DEMOS.score=function(h){
+  h.innerHTML='<div class="demo"><div class="rngrow"><input class="rng" id="ds" type="range" min="0" max="100" value="72"><output id="dv">72%</output></div><div class="read" id="dt"></div></div>';
+  const s=h.querySelector("#ds"), o=h.querySelector("#dv"), t=h.querySelector("#dt");
+  function run(){ const v=+s.value; o.textContent=v+"%";
+    t.innerHTML=v<25?"<b>You may say</b>\nNo strong indicators found.\n\n<b>You may not say</b>\nThis is authentic."
+     :v<60?"<b>You may say</b>\nInconclusive.\n\n<b>You may not say</b>\nAnything else. This is noise."
+     :v<85?"<b>You may say</b>\nWorth investigating — here is what we did next.\n\n<b>You may not say</b>\nThis is AI-generated."
+     :"<b>You may say</b>\nTwo independent detectors agree, and so does the provenance.\n\n<b>You may not say</b>\nThe number. Ever."; }
   s.addEventListener("input",run); run();
 };
-
-/* --- domain --- */
-DEMOS.domain=function(host){
-  host.innerHTML='<div class="demo"><div class="f"><label>Domain</label><input id="dm" type="text" inputmode="url" placeholder="example.com"></div>'+
-    '<div class="acts"><button class="act key" id="db">Build the checks</button></div><div id="do"></div></div>';
+DEMOS.domain=function(h){
+  h.innerHTML='<div class="demo"><div class="f"><label>Domain</label><input id="dm" type="text" inputmode="url" placeholder="example.com"></div>'+
+   '<div class="acts"><button class="act key" id="db">Build the checks</button></div><div id="do"></div></div>';
   const C=[["Registered",d=>"https://who.is/whois/"+d],["Archive",d=>"https://web.archive.org/web/*/"+d+"/*"],
-    ["First capture",d=>"https://web.archive.org/web/1996/http://"+d],["Certificates",d=>"https://crt.sh/?q="+encodeURIComponent(d)],
-    ["Who links in",d=>"https://www.google.com/search?q="+encodeURIComponent('"'+d+'" -site:'+d)],
-    ["What it publishes",d=>"https://www.google.com/search?q="+encodeURIComponent("site:"+d)],
-    ["Live scan",d=>"https://urlscan.io/search/#"+encodeURIComponent(d)],["DNS",d=>"https://www.whatsmydns.net/#A/"+d]];
-  const i=host.querySelector("#dm"), o=host.querySelector("#do");
-  function run(){
-    const d=i.value.trim().toLowerCase().replace(/^https?:\/\//,"").replace(/\/.*$/,"").replace(/^www\./,"");
+   ["First capture",d=>"https://web.archive.org/web/1996/http://"+d],["Certificates",d=>"https://crt.sh/?q="+encodeURIComponent(d)],
+   ["Who links in",d=>"https://www.google.com/search?q="+encodeURIComponent('"'+d+'" -site:'+d)],
+   ["What it publishes",d=>"https://www.google.com/search?q="+encodeURIComponent("site:"+d)],
+   ["Live scan",d=>"https://urlscan.io/search/#"+encodeURIComponent(d)],["DNS",d=>"https://www.whatsmydns.net/#A/"+d]];
+  const i=h.querySelector("#dm"), o=h.querySelector("#do");
+  function run(){ const d=i.value.trim().toLowerCase().replace(/^https?:\/\//,"").replace(/\/.*$/,"").replace(/^www\./,"");
     if(!d||d.indexOf(".")<1){ o.innerHTML='<div class="read">Enter a domain.</div>'; return; }
-    o.innerHTML='<div class="acts">'+C.map(c=>'<a class="act" href="'+c[1](d)+'" target="_blank" rel="noopener">'+c[0]+' ↗</a>').join("")+'</div>';
-  }
-  host.querySelector("#db").onclick=run;
-  i.addEventListener("keydown",e=>{ if(e.key==="Enter") run(); });
+    o.innerHTML='<div class="acts">'+C.map(c=>'<a class="act" href="'+c[1](d)+'" target="_blank" rel="noopener">'+c[0]+' ↗</a>').join("")+'</div>'; }
+  h.querySelector("#db").onclick=run; i.addEventListener("keydown",e=>{ if(e.key==="Enter") run(); });
 };
-
-/* --- case demos --- */
-function mcq(host,opts,correct,fbGood,fbBad,log){
-  host.innerHTML='<div class="demo wide"><div class="opts">'+opts.map((o,i)=>'<button class="opt" data-i="'+i+'">'+o+'</button>').join("")+
-    '</div><div class="read" id="mo" style="display:none"></div></div>';
-  const out=host.querySelector("#mo"); let done=false;
-  host.addEventListener("click",e=>{
-    const b=e.target.closest(".opt"); if(!b||done) return; done=true;
+function mcq(h,opts,correct,good,bad,log){
+  h.innerHTML='<div class="demo"><div class="opts">'+opts.map((o,i)=>'<button class="opt" data-i="'+i+'">'+o+'</button>').join("")+
+   '</div><div class="read" id="mo" style="display:none"></div></div>';
+  const out=h.querySelector("#mo"); let done=false;
+  h.addEventListener("click",e=>{ const b=e.target.closest(".opt"); if(!b||done) return; done=true;
     const p=+b.dataset.i;
-    host.querySelectorAll(".opt").forEach((o,i)=>{ if(i===correct) o.classList.add("right"); });
+    h.querySelectorAll(".opt").forEach((o,i)=>{ if(i===correct) o.classList.add("right"); });
     if(p!==correct) b.classList.add("wrong");
     out.style.display="block";
-    out.innerHTML=(p===correct?"<b>Correct.</b>\n":"<b>Not quite.</b>\n"+fbBad[p]+"\n\n")+fbGood;
-    if(log) addLog(log[0],log[1]);
-  });
+    out.innerHTML=(p===correct?"<b>Correct.</b>\n":"<b>Not quite.</b>\n"+bad[p]+"\n\n")+good;
+    if(log) addLog(log[0],log[1]); });
 }
-DEMOS.brief=function(host){
-  mcq(host,["Ask the sender where they got it","Archive it, then get the upload time","Check whether it rained in JB","Run an AI detector"],1,
-    "Archiving costs ten seconds and the post may be gone by lunchtime. The upload time is the next cheapest thing you can know.",
-    {0:"Worth doing — later. Senders rarely know the origin, and asking first burns time while the post can still be deleted.",
-     2:"Real weather plus old footage is exactly how these clips work. It proves nothing either way.",
-     3:"The most expensive check, and the least conclusive. Last, if at all."},
-    ["08:16","Archived the TikTok URL before doing anything else."]);
-};
-DEMOS.tiktok=function(host){
-  host.innerHTML='<div class="demo"><div class="f"><label>Video URL or ID</label><input id="tu" type="text" inputmode="url" placeholder="tiktok.com/@user/video/7123…"></div>'+
-    '<div class="acts"><button class="act key" id="tb">Decode</button><button class="act" id="tc">Use the case video</button></div>'+
-    '<div class="read" id="to" style="display:none"></div></div>';
-  const u=host.querySelector("#tu"), o=host.querySelector("#to");
-  function run(){
-    const m=String(u.value).match(/(\d{17,20})/); o.style.display="block";
+DEMOS.brief=h=>mcq(h,["Ask the sender where they got it","Archive it, then get the upload time","Check whether it rained in JB","Run an AI detector"],1,
+ "Archiving costs ten seconds and the post may be gone by lunchtime. The upload time is the next cheapest thing you can know.",
+ {0:"Worth doing — later. Senders rarely know the origin, and asking first burns time while the post can still be deleted.",
+  2:"Real weather plus old footage is exactly how these clips work. It proves nothing either way.",
+  3:"The most expensive check, and the least conclusive. Last, if at all."},["08:16","Archived the TikTok URL before anything else."]);
+DEMOS.tiktok=function(h){
+  h.innerHTML='<div class="demo"><div class="f"><label>Video URL or ID</label><input id="tu" type="text" inputmode="url" placeholder="tiktok.com/@user/video/7123…"></div>'+
+   '<div class="acts"><button class="act key" id="tb">Decode</button><button class="act" id="tc">Use the case video</button></div>'+
+   '<div class="read" id="to" style="display:none"></div></div>';
+  const u=h.querySelector("#tu"), o=h.querySelector("#to");
+  function run(){ const m=String(u.value).match(/(\d{17,20})/); o.style.display="block";
     if(!m){ o.innerHTML="<b>No video ID found.</b>"; return; }
     let ts; try{ ts=Number(BigInt(m[1])>>32n); }catch(e){ o.innerHTML="<b>Unreadable ID.</b>"; return; }
     if(!ts||ts<1400000000||ts>2000000000){ o.innerHTML="<b>Not a plausible date.</b>\n<i>Check you copied the video ID.</i>"; return; }
     const f=x=>new Date(x*1000).toISOString().slice(0,16).replace("T"," ");
     const days=Math.floor((Date.now()/1000-ts)/86400);
     o.innerHTML="<b>Uploaded</b>  "+f(ts)+" UTC\n<b>Local</b>     "+f(ts+8*3600)+" SGT\n<b>Age</b>       "+days.toLocaleString()+" days\n\n"+
-      (days>2?"<i>Not last night. It was already online "+days.toLocaleString()+" days ago.</i>":"<i>Fresh — but that says nothing about when it was filmed.</i>");
-    if(m[1]===CASE_ID) addLog("08:22","Video ID decodes to "+f(ts)+" UTC. Claim of “last night” contradicted at the first check.");
-  }
-  host.querySelector("#tb").onclick=run;
-  host.querySelector("#tc").onclick=()=>{ u.value="https://www.tiktok.com/@user/video/"+CASE_ID; run(); };
+      (days>2?"<i>Not last night. Already online "+days.toLocaleString()+" days ago.</i>":"<i>Fresh — but that says nothing about when it was filmed.</i>");
+    if(m[1]===CASE_ID) addLog("08:22","Video ID decodes to "+f(ts)+" UTC. “Last night” contradicted at the first check."); }
+  h.querySelector("#tb").onclick=run;
+  h.querySelector("#tc").onclick=()=>{ u.value="https://www.tiktok.com/@user/video/"+CASE_ID; run(); };
   u.addEventListener("keydown",e=>{ if(e.key==="Enter") run(); });
 };
-DEMOS.q3=function(host){
-  mcq(host,["It was filmed in November 2021","That 2021 news site is the original source","It existed online by November 2021, so it is not from last night","Nothing — TinEye dates are unreliable"],2,
-    "An earliest-indexed date is an upper bound. The footage existed by then. It does not tell you when it was filmed, or who shot it.",
-    {0:"Overreach. November 2021 is when a copy was indexed, not when the camera rolled.",
-     1:"You found the earliest indexed copy, which is not the same as the original. Check whether that site credits anyone.",
-     3:"TinEye's oldest date is one of the more reliable signals you have. Use it — as an upper bound."},
-    ["08:31","Keyframes through four engines. TinEye oldest: same frames published November 2021, different country."]);
-};
-DEMOS.features=function(host){
+DEMOS.q3=h=>mcq(h,["It was filmed in November 2021","That 2021 news site is the original source","It existed online by November 2021, so it is not from last night","Nothing — TinEye dates are unreliable"],2,
+ "An earliest-indexed date is an upper bound. The footage existed by then. It does not tell you when it was filmed, or who shot it.",
+ {0:"Overreach. November 2021 is when a copy was indexed, not when the camera rolled.",
+  1:"You found the earliest indexed copy, which is not the same as the original.",
+  3:"TinEye's oldest date is one of the more reliable signals you have — as an upper bound."},
+ ["08:31","Keyframes through four engines. TinEye oldest: November 2021, different country."]);
+DEMOS.features=function(h){
   const F=[["A road sign in Thai script",1],["Traffic driving on the left",0],["A songthaew pickup taxi",1],
-    ["Palm trees and monsoon rain",0],["A shopfront number starting +66",1],["Dry pavement two streets back",1]];
-  host.innerHTML='<div class="demo"><ul class="taps">'+F.map((f,i)=>'<li><button class="tap" aria-pressed="false" data-g="'+f[1]+'"><span class="bx">✓</span><span>'+f[0]+'</span></button></li>').join("")+
-    '</ul><div class="read" id="fo">Tap what contradicts the claim.</div></div>';
-  const o=host.querySelector("#fo");
-  host.addEventListener("click",e=>{
-    const b=e.target.closest(".tap"); if(!b) return;
+   ["Palm trees and monsoon rain",0],["A shopfront number starting +66",1],["Dry pavement two streets back",1]];
+  h.innerHTML='<div class="demo"><ul class="taps">'+F.map(f=>'<li><button class="tap" aria-pressed="false" data-g="'+f[1]+'"><span class="bx">✓</span><span>'+f[0]+'</span></button></li>').join("")+
+   '</ul><div class="read" id="fo">Tap what contradicts the claim.</div></div>';
+  const o=h.querySelector("#fo");
+  h.addEventListener("click",e=>{ const b=e.target.closest(".tap"); if(!b) return;
     b.setAttribute("aria-pressed",String(b.getAttribute("aria-pressed")!=="true"));
-    const on=[...host.querySelectorAll('[aria-pressed="true"]')];
+    const on=[...h.querySelectorAll('[aria-pressed="true"]')];
     const hit=on.filter(x=>x.dataset.g==="1").length, miss=on.filter(x=>x.dataset.g==="0").length;
     let m="<b>"+hit+" of 4</b> contradictions";
-    if(miss) m+="\n\n<i>Left-hand traffic and monsoon rain are consistent with Johor — and with half of Southeast Asia. Consistent is not confirming.</i>";
+    if(miss) m+="\n\n<i>Left-hand traffic and monsoon rain fit Johor — and half of Southeast Asia. Consistent is not confirming.</i>";
     if(hit===4&&!miss){ m+="\n\n<i>Thai script, a songthaew and a +66 number put this in Thailand. Dry pavement two streets back contradicts the footage itself.</i>";
-      addLog("08:44","Frame inventory: Thai signage, songthaew, +66 number, dry pavement nearby. Location inconsistent with Johor Bahru."); }
-    o.innerHTML=m;
-  });
+      addLog("08:44","Thai signage, songthaew, +66 number, dry pavement nearby. Location inconsistent with Johor Bahru."); }
+    o.innerHTML=m; });
 };
-DEMOS.q5=function(host){
-  mcq(host,["It confirms the footage is authentic","Nothing to the verdict — but it closes the question before it is asked","It shows the video was manipulated","It strengthens the timestamp finding"],1,
-    "It changes no conclusion. You still run it, because the first question in the newsroom will be “could it be AI?” — and a logged, inconclusive check answers that in one line.",
-    {0:"41% cannot confirm authenticity any more than it can confirm generation.",
-     2:"41% is the model saying it does not know. Reading that as manipulation is the commonest mistake with these tools.",
-     3:"It sits alongside the timestamp, independent of it. Two weak signals do not compound into a strong one."},
-    ["08:52","No EXIF, no C2PA (both expected). Detector 41% — inconclusive, no weight given."]);
-};
-DEMOS.verdict=function(host){
-  host.innerHTML='<p class="verdict">The clip was uploaded on 18 November 2021, more than four years before the flooding it claims to show. Signage and vehicle types are inconsistent with Johor Bahru.</p>';
+DEMOS.q5=h=>mcq(h,["It confirms the footage is authentic","Nothing to the verdict — but it closes the question before it is asked","It shows the video was manipulated","It strengthens the timestamp finding"],1,
+ "It changes no conclusion. You still run it, because the first question in the newsroom will be “could it be AI?” — and a logged, inconclusive check answers that in one line.",
+ {0:"41% cannot confirm authenticity any more than it can confirm generation.",
+  2:"41% is the model saying it does not know. Reading that as manipulation is the commonest mistake with these tools.",
+  3:"It sits alongside the timestamp, independent of it. Two weak signals do not compound into a strong one."},
+ ["08:52","No EXIF, no C2PA (both expected). Detector 41% — inconclusive, no weight given."]);
+DEMOS.verdict=function(h){
+  h.innerHTML='<p class="verdictline">Uploaded 18 November 2021 — more than four years before the flooding it claims to show. Signage and vehicle types are inconsistent with Johor Bahru.</p>';
   addLog("09:05","Verdict: false. Recirculated 2021 footage, wrong country.");
 };
-DEMOS.log=function(host){
+DEMOS.log=function(h){
   const draw=()=>{
-    host.innerHTML='<div class="demo wide"><ul class="logl">'+
+    h.innerHTML='<div class="demo"><ul class="logl">'+
       (CASELOG.length?CASELOG.map(l=>'<li><span class="t">'+l.t+'</span><span>'+l.x+'</span></li>').join("")
-        :'<li><span class="empty">Work the room and your log fills in here.</span></li>')+
+       :'<li><span class="empty">Work the room and your log fills in here.</span></li>')+
       '</ul><div class="acts"><button class="act key" id="lc">Copy the log</button><button class="act" id="lr">Clear</button></div></div>';
-    host.querySelector("#lc").onclick=async()=>{
-      const b=host.querySelector("#lc");
-      if(!CASELOG.length){ b.textContent="Nothing yet"; setTimeout(()=>b.textContent="Copy the log",1600); return; }
-      const txt="VERIFICATION LOG — training scenario\nClaim: flooding in Johor Bahru, forwarded via WhatsApp\n\n"+
-        CASELOG.map(l=>l.t+"  "+l.x).join("\n");
+    h.querySelector("#lc").onclick=async()=>{ const b=h.querySelector("#lc");
+      if(!CASELOG.length){ b.textContent="Nothing yet"; setTimeout(()=>b.textContent="Copy the log",1500); return; }
+      const txt="VERIFICATION LOG — training scenario\nClaim: flooding in Johor Bahru, forwarded via WhatsApp\n\n"+CASELOG.map(l=>l.t+"  "+l.x).join("\n");
       try{ await navigator.clipboard.writeText(txt); b.textContent="Copied ✓"; }catch(e){ b.textContent="Copy failed"; }
-      setTimeout(()=>b.textContent="Copy the log",1600);
-    };
-    host.querySelector("#lr").onclick=()=>{ CASELOG.length=0; draw(); };
-  };
-  draw();
+      setTimeout(()=>b.textContent="Copy the log",1500); };
+    h.querySelector("#lr").onclick=()=>{ CASELOG.length=0; draw(); };
+  }; draw();
 };
-
-/* ---------- go ---------- */
 route();
 </script>
 </body>
